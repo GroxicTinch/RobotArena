@@ -1,0 +1,3 @@
+// include 'app', 'aiOne', 'aiTwo', 'aiDependants'
+
+rootProject.name = 'RobotArena'
