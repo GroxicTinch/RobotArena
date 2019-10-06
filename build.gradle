@@ -1,18 +1,9 @@
 plugins {
     id 'java'
-    id 'application'
 }
 
-compileJava {
-    options.compilerArgs.add "-Xlint:unchecked"
-}
-
-jar {
-    manifest {
-        attributes 'Main-Class': 'RobotArenaApp'
-    }
-}
-
-application {
-    mainClassName = 'RobotArenaApp'
+allprojects{
+  compileJava {
+      options.compilerArgs.add "-Xlint:unchecked"
+  }
 }

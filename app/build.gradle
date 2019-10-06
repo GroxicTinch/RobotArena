@@ -1,0 +1,18 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+dependencies{
+  //implementation project(':aiOne'), project(':aiTwo')
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'RobotArenaApp'
+    }
+}
+
+application {
+    mainClassName = 'RobotArenaApp'
+}
