@@ -1,3 +1,5 @@
+package robotarena;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.text.ParseException;
@@ -27,7 +29,7 @@ public class RobotArenaApp {
           boolean robotAdded = RobotArenaSettings.addRobot(robot);
 
           if(!robotAdded) {
-            RobotArenaSettings.initRobotControls(robot.getName(), robot.getX(), robot.getY());
+            RobotArenaSettings.initRobotControls(robot.getInfo().getName(), robot.getInfo().getX(), robot.getInfo().getY());
             i--;
 
             JOptionPane.showMessageDialog(null, RobotArenaSettings.getFailReason());
@@ -59,7 +61,7 @@ public class RobotArenaApp {
         loggerArea.setBorder(BorderFactory.createEtchedBorder());
         RobotArenaSettings.logger.setEditable(false);
 
-        RobotArenaSettings.addLogMsg("Grid initialized:\nwidth:"+ RobotArenaSettings.getArenaWidth() +"  height:"+ RobotArenaSettings.getArenaHeight());
+        RobotArenaSettings.log("Grid initialized:\nwidth:"+ RobotArenaSettings.getArenaWidth() +"  height:"+ RobotArenaSettings.getArenaHeight());
         
         JSplitPane splitPane = new JSplitPane(
           JSplitPane.HORIZONTAL_SPLIT, arena, RobotArenaSettings.logger);

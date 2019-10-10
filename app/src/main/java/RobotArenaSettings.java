@@ -1,3 +1,5 @@
+package robotarena;
+
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,8 +49,6 @@ public class RobotArenaSettings {
 
   static String failReason;
 
-  static HashMap<String, Robot> robots;
-
   // [TODO] AI Type for each robot
 
   public static void init() {
@@ -59,7 +59,6 @@ public class RobotArenaSettings {
 
     robotCount = 0;
 
-    robots = new HashMap<String, Robot>();
     robotNames = new ArrayList<String>();
 
     generateRobotNames();
@@ -73,42 +72,28 @@ public class RobotArenaSettings {
     robotNames.add("Peter");
   }
 
-  public static void addLogMsg(String msg) {
-    logger.append(msg +"\n");
-  }
-
   public static boolean addRobot(Robot robot) {
     failReason = "";
 
-    if (robots.containsKey(robot.getName())) {
-      failReason += "A Robot with the name '"+ robot.getName() +"' already exists.\n";
+    if (RobotControl.getAllRobotsDictionary().containsKey(robot.getInfo().getName())) {
+      failReason += "A Robot with the name '"+ robot.getInfo().getName() +"' already exists.\n";
     }
-    if (robot.getStartX() < 0 || robot.getStartX() >= getArenaWidth()) {
-      failReason += "Starting X was "+ robot.getStartX() +" but should be between 0 and "+ (getArenaWidth()-1) +".\n";
+    if (robot.getInfo().getDefX() < 0 || robot.getInfo().getDefX() >= getArenaWidth()) {
+      failReason += "Starting X was "+ robot.getInfo().getDefX() +" but should be between 0 and "+ (getArenaWidth()-1) +".\n";
     }
-    if (robot.getStartY() < 0 || robot.getStartY() >= getArenaHeight()) {
-      failReason += "Starting Y was "+ robot.getStartX() +" but should be between 0 and "+ (getArenaHeight()-1) +".\n";
+    if (robot.getInfo().getDefY() < 0 || robot.getInfo().getDefY() >= getArenaHeight()) {
+      failReason += "Starting Y was "+ robot.getInfo().getDefX() +" but should be between 0 and "+ (getArenaHeight()-1) +".\n";
     }
-    if(isGridCellOccupied(robot.getStartX(), robot.getStartY())) { 
-      failReason += "A Robot is already at X:"+ robot.getStartX() +" Y:"+ robot.getStartX() +".\n";
+    if(RobotControl.isGridCellOccupied(robot.getInfo().getDefX(), robot.getInfo().getDefY())) { 
+      failReason += "A Robot is already at X:"+ robot.getInfo().getDefX() +" Y:"+ robot.getInfo().getDefX() +".\n";
     }
 
     if(failReason.length() > 0) {
       return false;
     } else {
-      robots.put(robot.getName(), robot);
+      RobotControl.registerRobot(robot.getInfo());
       return true;
     }
-  }
-
-  public static boolean isGridCellOccupied(int x, int y) {
-    for(Map.Entry<String, Robot> entry : robots.entrySet()) {
-      Robot robot = entry.getValue();
-      if(robot.getX() == x && robot.getY() == y) {
-        return true;
-      }
-    }
-    return false;
   }
 
   public static void initArenaControls() {
@@ -127,6 +112,10 @@ public class RobotArenaSettings {
 
     posXSpinner = new JSpinner(new SpinnerNumberModel(x, 0, getArenaWidth()-1, 1));
     posYSpinner = new JSpinner(new SpinnerNumberModel(y, 0, getArenaHeight()-1, 1));
+  }
+
+  public static void log(String msg) {
+    logger.append(msg +"\n");
   }
 
   public static void saveArenaSettings() {
@@ -175,9 +164,5 @@ public class RobotArenaSettings {
     } else {
       return "";
     }
-  }
-
-  public static HashMap<String, Robot> getRobots() {
-    return robots;
   }
 }

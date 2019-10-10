@@ -4,15 +4,15 @@ plugins {
 }
 
 dependencies{
-  //implementation project(':aiOne'), project(':aiTwo')
+  implementation project(':aiOne'), project(':aiTwo'), project(':aiDependencies')
 }
 
 jar {
     manifest {
-        attributes 'Main-Class': 'RobotArenaApp'
+        attributes 'Main-Class': 'robotarena.RobotArenaApp'
     }
 }
 
 application {
-    mainClassName = 'RobotArenaApp'
+    mainClassName = 'robotarena.RobotArenaApp'
 }

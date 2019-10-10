@@ -1,7 +1,14 @@
+package robotarena;
+
 import java.awt.*;
 import javax.swing.*;
 import java.util.HashMap;
 import java.util.Map;
+
+// Control overall game
+// Provide info to each virtual robot
+// Display what happens
+// Starts up each AI Instance with runAI(RobotControl obj) (obj must be different)
 
 /**
  * A Swing GUI element that displays a grid on which you can draw images, text and lines.
@@ -67,11 +74,10 @@ public class SwingArena extends JPanel {
     
     // Draw in Robots
     // Invoke helper methods to draw things at the current location.
-    for(Map.Entry<String, Robot> entry : RobotArenaSettings.getRobots().entrySet()) {
-      Robot robot = entry.getValue();
-
-      drawImage(gfx, robot.getImage(), robot.getX(), robot.getY());
-      drawLabel(gfx, robot.getName() +" ("+ robot.getHealth() +"%)", robot.getX(), robot.getY());
+    RobotInfo[] robotInfoArray = RobotControl.getAllRobots();
+    for(int i = 0; i < robotInfoArray.length; i++) {
+      drawImage(gfx, robotInfoArray[i].getImage(), robotInfoArray[i].getX(), robotInfoArray[i].getY());
+      drawLabel(gfx, robotInfoArray[i].getName() +" ("+ robotInfoArray[i].getHealth() +"%)", robotInfoArray[i].getX(), robotInfoArray[i].getY());
       //drawLine(gfx, robotX, robotY, robotX + 1.0, robotY - 2.0);
     }
     
