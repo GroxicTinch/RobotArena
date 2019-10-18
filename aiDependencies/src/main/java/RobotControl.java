@@ -8,69 +8,30 @@ import java.util.Map;
 //   must interact with rest of code
 //   move...() and fire() must return true if action is legal+carried out or false if it would have broken a rule(doesnt indicate a hit)
 
-public class RobotControl {
+interface RobotControl {
   static HashMap<String, RobotInfo> robots = new HashMap<String, RobotInfo>();
 
-  public RobotInfo robotInfo;
+  public RobotInfo getRobot();
 
-  public RobotControl(RobotInfo robotInfoIn) {
-    robotInfo = robotInfoIn;
-  }
+  public boolean moveNorth();
 
-  public RobotInfo getRobot() {
-    return robotInfo;
-  }
+  public boolean moveEast();
 
-  public boolean moveNorth() {
-    return isMovePosLegal(robotInfo.getX(), robotInfo.getY() - 1);
-  }
+  public boolean moveSouth();
 
-  public boolean moveEast() {
-    return isMovePosLegal(robotInfo.getX() + 1, robotInfo.getY());
-  }
+  public boolean moveWest();
 
-  public boolean moveSouth() {
-    return isMovePosLegal(robotInfo.getX(), robotInfo.getY() + 1);
-  }
+  public boolean fire(int x, int y);
 
-  public boolean moveWest() {
-    return isMovePosLegal(robotInfo.getX() - 1, robotInfo.getY());
-  }
+  public boolean isMovePosLegal(int x, int y);
 
-  public boolean fire(int x, int y) {
-    return true;
-  }
+  public boolean isShotPosLegal(int x, int y);
 
-  boolean isMovePosLegal(int x, int y) {
-    return (x >= 0 && x <= RobotArenaSettings.getArenaWidth() &&
-            y >= 0 && y <= RobotArenaSettings.getArenaHeight() &&
-            !isGridCellOccupied(x, y));
-  }
+  public boolean isGridCellOccupied(int x, int y);
 
-  boolean isShotPosLegal(int x, int y) {
-    return (x >= 0 && x <= RobotArenaSettings.getArenaWidth() &&
-            y >= 0 && y <= RobotArenaSettings.getArenaHeight());
-  }
+  public RobotInfo[] getAllRobots();
 
-  public static boolean isGridCellOccupied(int x, int y) {
-    for(Map.Entry<String, RobotInfo> entry : robots.entrySet()) {
-      RobotInfo robotInfo = entry.getValue();
-      if(robotInfo.getX() == x && robotInfo.getY() == y) {
-        return true;
-      }
-    }
-    return false;
-  }
+  public HashMap<String, RobotInfo> getAllRobotsDictionary();
 
-  public static RobotInfo[] getAllRobots() {
-    return robots.values().toArray(new RobotInfo[robots.size()]);
-  }
-
-  public static HashMap<String, RobotInfo> getAllRobotsDictionary() {
-    return robots;
-  }
-
-  public static void registerRobot(RobotInfo robotInfoIn) {
-    robots.put(robotInfoIn.getName() ,robotInfoIn);
-  }
+  public void registerRobot(RobotInfo robotInfoIn);
 }

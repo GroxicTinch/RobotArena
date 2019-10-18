@@ -2,55 +2,22 @@ package robotarena;
 
 import javax.swing.ImageIcon;
 
-public class RobotInfo {
-  String name;
-  // Represents the image to draw.
-  ImageIcon image;
+public interface RobotInfo {
+  public void reset();
 
-  // Default variables
-  int[] defPos;
-  double defHealth;
+  public void setPos(int x, int y);
 
-  // Current variables
-  int[] currPos;
-  double currHealth;
+  public String getName();
+  public ImageIcon getImage();
 
-  public RobotInfo(String nameIn, int xIn, int yIn, double healthIn, String imageName) {
-    name = nameIn;
+  public int getDefX();
+  public int getDefY();
+  public double getDefHealth();
 
-    defPos = new int[2];
-    currPos = new int[2];
+  public int getX();
+  public int getY();
+  public double getHealth();
 
-    defPos[0] = xIn;
-    defPos[1] = yIn;
-
-    defHealth = healthIn;
-
-    // Here's how you get an Image object from an image file (which you provide in the 
-    // 'resources/' directory.
-    image = new ImageIcon(getClass().getClassLoader().getResource(imageName));
-  }
-
-  public void reset() {
-    currPos[0] = defPos[0];
-    currPos[1] = defPos[1];
-
-    currHealth = defHealth;
-  }
-
-  public void setPos(int x, int y) {
-    currPos[0] = x;
-    currPos[1] = y;
-  }
-
-  public String getName() {return name;}
-  public ImageIcon getImage() { return image; }
-
-  public int getDefX() {return currPos[0];}
-  public int getDefY() {return currPos[1];}
-  public double getDefHealth() {return currHealth;}
-
-  public int getX() {return currPos[0];}
-  public int getY() {return currPos[1];}
-  public double getHealth() {return currHealth;}
+  public RobotAI getAI();
+  public RobotControl getControl();
 }

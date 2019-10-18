@@ -10,6 +10,9 @@ package robotarena;
 //   Uses RobotControl
 //   Gets name, grid location and hp of all robots via RobotInfo
 
-public class RobotAI {
-  
+interface RobotAI {
+  enum Direction { NORTH, SOUTH, EAST, WEST }
+
+  public String toString();
+  public void runAI(RobotControl robotControl) throws InterruptedException;
 }

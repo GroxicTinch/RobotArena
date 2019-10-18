@@ -74,7 +74,8 @@ public class SwingArena extends JPanel {
     
     // Draw in Robots
     // Invoke helper methods to draw things at the current location.
-    RobotInfo[] robotInfoArray = RobotControl.getAllRobots();
+    RobotControl robotControlBlank = new RobotControlImpl();
+    RobotInfo[] robotInfoArray = robotControlBlank.getAllRobots();
     for(int i = 0; i < robotInfoArray.length; i++) {
       drawImage(gfx, robotInfoArray[i].getImage(), robotInfoArray[i].getX(), robotInfoArray[i].getY());
       drawLabel(gfx, robotInfoArray[i].getName() +" ("+ robotInfoArray[i].getHealth() +"%)", robotInfoArray[i].getX(), robotInfoArray[i].getY());

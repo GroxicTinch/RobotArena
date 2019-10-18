@@ -13,7 +13,9 @@ public class RobotArenaApp {
     if(!askSettings()) {
       userCanceled = true;
     } else {
-      Robot robot;
+      RobotInfo robotInfo;
+
+      // Settings need to be initialized before askRobotSettings is called
       RobotArenaSettings.initRobotControls();
 
       for(int i = 0; i < RobotArenaSettings.getRobotCount(); i++) {
@@ -24,16 +26,18 @@ public class RobotArenaApp {
         } else {
           robot = new Robot(RobotArenaSettings.robotName.getText(),
                           (Integer)RobotArenaSettings.posXSpinner.getValue(),
-                          (Integer)RobotArenaSettings.posYSpinner.getValue());
+                          (Integer)RobotArenaSettings.posYSpinner.getValue(),
+                          (RobotAI)RobotArenaSettings.aiList.getSelectedItem());
 
           boolean robotAdded = RobotArenaSettings.addRobot(robot);
 
           if(!robotAdded) {
-            RobotArenaSettings.initRobotControls(robot.getInfo().getName(), robot.getInfo().getX(), robot.getInfo().getY());
+            // If the users robot was not added successfully then keep the settings of the Robot.
             i--;
 
             JOptionPane.showMessageDialog(null, RobotArenaSettings.getFailReason());
-          } else {
+          } else if(i < (RobotArenaSettings.getRobotCount()-1)) {
+            // If the users robot was added successfully then default the settings unless it was the last
             RobotArenaSettings.initRobotControls();
           }
         }
@@ -47,13 +51,26 @@ public class RobotArenaApp {
         SwingArena arena = new SwingArena();
         
         JToolBar toolbar = new JToolBar();
-        JButton btn1 = new JButton("My Button 1");
-        JButton btn2 = new JButton("My Button 2");
-        toolbar.add(btn1);
-        toolbar.add(btn2);
+        JButton btnStartGame = new JButton("Start");
+        JButton btnStopGame = new JButton("Stop");
+        toolbar.add(btnStartGame);
+        toolbar.add(btnStopGame);
+
+        btnStartGame.setEnabled(true);
+        btnStopGame.setEnabled(false);
         
-        btn1.addActionListener((event) -> {
-          System.out.println("Button 1 pressed");
+        btnStartGame.addActionListener((event) -> {
+          RobotArenaSettings.log("\n-- Game Started");
+
+          btnStartGame.setEnabled(false);
+          btnStopGame.setEnabled(true);
+        });
+
+        btnStopGame.addActionListener((event) -> {
+          RobotArenaSettings.log("-- Game Stopped");
+
+          btnStartGame.setEnabled(true);
+          btnStopGame.setEnabled(false);
         });
         
         RobotArenaSettings.logger = new JTextArea();
@@ -161,10 +178,24 @@ public class RobotArenaApp {
     JPanel basePanel = new JPanel();
     basePanel.setLayout(new GridLayout(3, 1, 5, 5));
 
-    basePanel.add(new JLabel("Name:"));
-    basePanel.add(RobotArenaSettings.robotName);
+    // Robot Name
+    JPanel namePanel = new JPanel();
+    TitledBorder nameTitle = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)
+                                     , "Name");
+    namePanel.setBorder(nameTitle);
+    namePanel.add(RobotArenaSettings.robotName);
+    basePanel.add(namePanel);
 
-    // Arena Size
+    // AI
+    JPanel aiTypePanel = new JPanel();
+    aiTypePanel.setLayout(new GridLayout(1, 1, 5, 5));
+    TitledBorder aiTypeTitle = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)
+                                     , "AI Type");
+    aiTypePanel.setBorder(aiTypeTitle);
+    aiTypePanel.add(RobotArenaSettings.aiList);
+    basePanel.add(aiTypePanel);
+
+    // Arena Position
     JPanel arenaPosPanel = new JPanel();
     TitledBorder arenaPosTitle = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)
                                      , "Start Position");
