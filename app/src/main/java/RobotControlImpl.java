@@ -24,44 +24,57 @@ public class RobotControlImpl implements RobotControl {
   }
 
   public boolean moveNorth() {
-    return isMovePosLegal(robotInfo.getX(), robotInfo.getY() - 1);
+    return move(robotInfo.getX(), robotInfo.getY() - 1);
   }
 
   public boolean moveEast() {
-    return isMovePosLegal(robotInfo.getX() + 1, robotInfo.getY());
+    return move(robotInfo.getX() + 1, robotInfo.getY());
   }
 
   public boolean moveSouth() {
-    return isMovePosLegal(robotInfo.getX(), robotInfo.getY() + 1);
+    return move(robotInfo.getX(), robotInfo.getY() + 1);
   }
 
   public boolean moveWest() {
-    return isMovePosLegal(robotInfo.getX() - 1, robotInfo.getY());
+    return move(robotInfo.getX() - 1, robotInfo.getY());
   }
 
-  public boolean fire(int x, int y) {
+  private boolean move(int x, int y) {
+    boolean moveLegal = isMovePosLegal(x, y);
+    if(moveLegal) {
+      SwingArena.getInstance().setRobotPosition(robotInfo, x, y);
+    }
+    return moveLegal;
+  }
+
+  public boolean fire(int x, int y) throws InterruptedException {
+    boolean shotLegal = isShotPosLegal(x, y);
+    if(shotLegal) {
+      Thread.sleep(500);
+      SwingArena.getInstance().shoot(robotInfo, x, y);
+    }
     return true;
   }
 
   public boolean isMovePosLegal(int x, int y) {
-    return (x >= 0 && x <= RobotArenaSettings.getArenaWidth() &&
-            y >= 0 && y <= RobotArenaSettings.getArenaHeight() &&
-            !isGridCellOccupied(x, y));
+    return (x >= 0 && x < RobotArenaSettings.getArenaWidth() &&
+            y >= 0 && y < RobotArenaSettings.getArenaHeight() &&
+            isGridCellOccupied(x, y) == null);
   }
 
   public boolean isShotPosLegal(int x, int y) {
-    return (x >= 0 && x <= RobotArenaSettings.getArenaWidth() &&
-            y >= 0 && y <= RobotArenaSettings.getArenaHeight());
+    return (x >= 0 && x < RobotArenaSettings.getArenaWidth() &&
+            y >= 0 && y < RobotArenaSettings.getArenaHeight());
   }
 
-  public boolean isGridCellOccupied(int x, int y) {
+  public RobotInfo isGridCellOccupied(int x, int y) {
     for(Map.Entry<String, RobotInfo> entry : robots.entrySet()) {
       RobotInfo robotInfo = entry.getValue();
       if(robotInfo.getX() == x && robotInfo.getY() == y) {
-        return true;
+        return robotInfo;
       }
     }
-    return false;
+    return null;
   }
 
   public RobotInfo[] getAllRobots() {

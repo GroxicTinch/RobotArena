@@ -10,30 +10,57 @@ package robotarena;
 //   Uses RobotControl
 //   Gets name, grid location and hp of all robots via RobotInfo
 
-public class RobotAIDefault implements RobotAI {
+public class RobotAISeeker implements RobotAI {
 
-  public RobotAIDefault() {}
+  public RobotAISeeker() {}
 
   @Override
   public String toString() {
-    return "Default";
+    return "Seeker";
   }
 
   public void runAI(RobotControl robotControl) throws InterruptedException {
+    RobotInfo myRobot = robotControl.getRobot();
     Direction dir = Direction.NORTH;
 
-    RobotInfo myRobot = robotControl.getRobot();
     while(true) {
+      int closestRobotDistance = -1;
+
       for(RobotInfo robot : robotControl.getAllRobots()) {
-        if(robot.getName() != myRobot.getName() &&
-           robot.isAlive() &&
-           Math.abs(myRobot.getX() - robot.getX()) <= 2 &&
-           Math.abs(myRobot.getY() - robot.getY()) <= 2) {
-          robotControl.fire(robot.getX(), robot.getY());
-          break;
+        if(robot.getName() != myRobot.getName() && robot.isAlive()) {
+          int robotDistanceX = Math.abs(myRobot.getX() - robot.getX());
+          int robotDistanceY = Math.abs(myRobot.getY() - robot.getY());
+
+          int robotDistance = robotDistanceX + robotDistanceY;
+
+          if(closestRobotDistance == -1 || robotDistance < closestRobotDistance) {
+            closestRobotDistance = robotDistance;
+
+            // If the robot in columns than in rows then move vertically
+            if(robotDistanceX < robotDistanceY) {
+              if(robot.getY() < myRobot.getY()) {
+                dir = Direction.NORTH;
+              } else {
+                dir = Direction.SOUTH;
+              }
+            } else {
+              if(robot.getX() < myRobot.getX()) {
+                dir = Direction.WEST;
+              } else {
+                dir = Direction.EAST;
+              }
+            }
+          }
+
+          if(robotDistanceX <= 2 && robotDistanceY <= 2) {
+            robotControl.fire(robot.getX(), robot.getY());
+            break;
+          }
         }
       }
 
+      // Choose a random direction, if that fails then go in the next direction, clockwise
+      
       boolean moved = false;
 
       while(!moved) {

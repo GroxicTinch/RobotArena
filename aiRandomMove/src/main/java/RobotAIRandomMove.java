@@ -10,18 +10,16 @@ package robotarena;
 //   Uses RobotControl
 //   Gets name, grid location and hp of all robots via RobotInfo
 
-public class RobotAIDefault implements RobotAI {
+public class RobotAIRandomMove implements RobotAI {
 
-  public RobotAIDefault() {}
+  public RobotAIRandomMove() {}
 
   @Override
   public String toString() {
-    return "Default";
+    return "Random Move Direction";
   }
 
   public void runAI(RobotControl robotControl) throws InterruptedException {
-    Direction dir = Direction.NORTH;
-
     RobotInfo myRobot = robotControl.getRobot();
     while(true) {
       for(RobotInfo robot : robotControl.getAllRobots()) {
@@ -34,6 +32,8 @@ public class RobotAIDefault implements RobotAI {
         }
       }
 
+      // Choose a random direction, if that fails then go in the next direction, clockwise
+      Direction dir = Direction.values()[(int)(Math.random() * 4)];
       boolean moved = false;
 
       while(!moved) {

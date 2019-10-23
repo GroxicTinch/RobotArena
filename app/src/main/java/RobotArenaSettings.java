@@ -1,6 +1,8 @@
 package robotarena;
 
 import javax.swing.*;
+import java.awt.Dimension;
+import java.awt.Image;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,17 +13,22 @@ public class RobotArenaSettings {
 
   // Available AI Implementations
   final static RobotAI[] robotAIs = {
-    new RobotAIDefault()
+    new RobotAIDefault(),
+    new RobotAIRandomMove(),
+    new RobotAISeeker(),
+    new RobotAIRunner()
   };
 
   // Limits
   final static int MINWIDTH = 8;
   final static int MAXWIDTH = 15;
 
-  final static int MINHEIGHT = 8;
+  final static int MINHEIGHT = 1;
   final static int MAXHEIGHT = 15;
 
   final static int MAXROBOTS = 4; // [TODO] find a better number
+
+  final static int ROBOTIMAGESIZE = 100;
 
   // Default Values
   final static int DEFAULTWIDTH = 12;
@@ -37,13 +44,16 @@ public class RobotArenaSettings {
 
   // Robot Controls
   public static JTextArea robotName;
+  public static JLabel robotImage;
 
   public static JSpinner posXSpinner;
   public static JSpinner posYSpinner;
 
   public static JComboBox aiList;
+  public static JComboBox imageList;
 
   static ArrayList<String> robotNames;
+  static ArrayList<String> robotImages;
 
   // Main Controls
   public static JTextArea logger;
@@ -67,8 +77,10 @@ public class RobotArenaSettings {
     robotCount = 0;
 
     robotNames = new ArrayList<String>();
+    robotImages = new ArrayList<String>();
 
     generateRobotNames();
+    generateRobotImages();
     initArenaControls();
   }
 
@@ -77,6 +89,14 @@ public class RobotArenaSettings {
     robotNames.add("Steven");
     robotNames.add("Max");
     robotNames.add("Peter");
+    robotNames.add("Tyler");
+    robotNames.add("Beth");
+    robotNames.add("Ray");
+  }
+
+  static void generateRobotImages() {
+    robotImages.add("1554047213");
+    robotImages.add("droid2");
   }
 
   public static boolean addRobot(RobotInfo robot) {
@@ -91,7 +111,7 @@ public class RobotArenaSettings {
     if (robot.getDefY() < 0 || robot.getDefY() >= getArenaHeight()) {
       failReason += "Starting Y was "+ robot.getDefX() +" but should be between 0 and "+ (getArenaHeight()-1) +".\n";
     }
-    if(robot.getControl().isGridCellOccupied(robot.getDefX(), robot.getDefY())) { 
+    if(robot.getControl().isGridCellOccupied(robot.getDefX(), robot.getDefY()) != null) { 
       failReason += "A Robot is already at X:"+ robot.getDefX() +" Y:"+ robot.getDefX() +".\n";
     }
 
@@ -111,10 +131,10 @@ public class RobotArenaSettings {
   }
 
   public static void initRobotControls() {
-    initRobotControls(getRobotName(), 0, 0, 0);
+    initRobotControls(getRandomRobotName(), 0, 0, 0, getRandomRobotImageIndex());
   }
 
-  public static void initRobotControls(String name, int x, int y, int robotAIIndex) {
+  public static void initRobotControls(String name, int x, int y, int robotAIIndex, int robotImageIndex) {
     robotName = new JTextArea(name, 0, 20);
 
     posXSpinner = new JSpinner(new SpinnerNumberModel(x, 0, getArenaWidth()-1, 1));
@@ -123,11 +143,46 @@ public class RobotArenaSettings {
     aiList = new JComboBox(robotAIs);
     aiList.setSelectedIndex(robotAIIndex);
     aiList.setSize(20, aiList.getPreferredSize().height);
+
+    imageList = new JComboBox(robotImages.toArray(new String[0]));
+    imageList.setSelectedIndex(robotImageIndex);
+    imageList.setSize(20, imageList.getPreferredSize().height);
+
+    robotImage = new JLabel();
+    robotImage.setHorizontalAlignment(JLabel.CENTER);
+    robotImage.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
+
+    robotImage.setPreferredSize(new Dimension(ROBOTIMAGESIZE, ROBOTIMAGESIZE));
+    updateRobotImage(robotImages.get(robotImageIndex));
+
+    imageList.addActionListener((event) -> {
+      String robotImageName = (String)imageList.getSelectedItem();
+      updateRobotImage(robotImageName);
+    });
+  }
+
+  public static void updateRobotImage(String robotImageName) {
+    // Get Image instead of icon then fix the sizing
+    Image img = new ImageIcon(RobotArenaSettings.class.getClassLoader().getResource(robotImageName + ".png")).getImage();
+    ImageIcon icon = new ImageIcon(img.getScaledInstance(ROBOTIMAGESIZE, ROBOTIMAGESIZE, Image.SCALE_SMOOTH));
+
+    robotImage.setIcon(icon);
+
+    if (icon != null) {
+      robotImage.setText(null);
+    } else {
+      robotImage.setText("Image Not Found");
+    }
   }
 
   public static void log(String msg) {
     // TODO make threadsafe
     logger.append(msg +"\n");
+  }
+
+  public static void logClear() {
+    // TODO make threadsafe
+    logger.setText("");
   }
 
   public static void saveArenaSettings() {
@@ -168,13 +223,23 @@ public class RobotArenaSettings {
     return robotCount;
   }
 
-  public static String getRobotName() {
+  // Randomly get a robot name from the robotNames arraylist every time a new robot needs settings
+  // If the list of names is empty then return blank.
+  public static String getRandomRobotName() {
     if(robotNames.size() > 0) {
       int pos = (int)(Math.random() * robotNames.size());
 
       return robotNames.remove(pos);
     } else {
       return "";
+    }
+  }
+
+  public static int getRandomRobotImageIndex() {
+    if(robotImages.size() > 0) {
+      return (int)(Math.random() * robotImages.size());
+    } else {
+      return 0;
     }
   }
 }

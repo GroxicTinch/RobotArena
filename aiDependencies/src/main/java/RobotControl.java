@@ -14,23 +14,18 @@ interface RobotControl {
   public RobotInfo getRobot();
 
   public boolean moveNorth();
-
   public boolean moveEast();
-
   public boolean moveSouth();
-
   public boolean moveWest();
 
-  public boolean fire(int x, int y);
+  public boolean fire(int x, int y) throws InterruptedException;
 
   public boolean isMovePosLegal(int x, int y);
-
   public boolean isShotPosLegal(int x, int y);
 
-  public boolean isGridCellOccupied(int x, int y);
+  public RobotInfo isGridCellOccupied(int x, int y);
 
   public RobotInfo[] getAllRobots();
-
   public HashMap<String, RobotInfo> getAllRobotsDictionary();
 
   public void registerRobot(RobotInfo robotInfoIn);

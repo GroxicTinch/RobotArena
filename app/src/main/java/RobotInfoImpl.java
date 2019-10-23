@@ -12,10 +12,11 @@ import javax.swing.ImageIcon;
 
 
 public class RobotInfoImpl implements RobotInfo {
-  private static final String DEF_IMAGE_FILE = "1554047213.png";
+  private static final String DEF_IMAGE_FILE = "1554047213";
     
   RobotAI robotAI;
   RobotControl robotControl;
+  Thread thread;
 
   String name;
   // Represents the image to draw.
@@ -28,6 +29,7 @@ public class RobotInfoImpl implements RobotInfo {
   // Current variables
   int[] currPos;
   double currHealth;
+
 
   public RobotInfoImpl(String nameIn, int xIn, int yIn, RobotAI robotAIIn) {
     this(nameIn, xIn, yIn, 100.0, DEF_IMAGE_FILE, robotAIIn);
@@ -50,7 +52,7 @@ public class RobotInfoImpl implements RobotInfo {
 
     // Here's how you get an Image object from an image file (which you provide in the 
     // 'resources/' directory.
-    image = new ImageIcon(getClass().getClassLoader().getResource(imageName));
+    image = new ImageIcon(getClass().getClassLoader().getResource(imageName +".png"));
     robotAI = robotAIIn;
     robotControl = new RobotControlImpl(this);
 
@@ -68,6 +70,41 @@ public class RobotInfoImpl implements RobotInfo {
     currPos[0] = x;
     currPos[1] = y;
   }
+
+  public boolean damage(double amount) {
+    boolean isDead = false;
+
+    currHealth -= amount;
+
+    if(!isAlive()) {
+      currHealth = 0;
+      isDead = true;
+    }
+
+    return isDead;
+  }
+
+  public boolean isAlive() {
+    return (currHealth > 0);
+  }
+
+  public void setAndStartThread(Thread threadIn) {
+    if(thread != null) {
+      thread.interrupt();
+    }
+
+    thread = threadIn;
+    thread.start();
+  }
+
+  public void stopThread() {
+    if(thread != null) {
+      thread.interrupt();
+      thread = null;
+    }
+  }
+
+  public Thread getThread() {return thread;}
 
   public String getName() {return name;}
   public ImageIcon getImage() { return image; }

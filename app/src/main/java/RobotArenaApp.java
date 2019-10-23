@@ -13,7 +13,7 @@ public class RobotArenaApp {
     if(!askSettings()) {
       userCanceled = true;
     } else {
-      RobotInfo robotInfo;
+      RobotInfo robot;
 
       // Settings need to be initialized before askRobotSettings is called
       RobotArenaSettings.initRobotControls();
@@ -24,9 +24,10 @@ public class RobotArenaApp {
           userCanceled = true;
           break;
         } else {
-          robot = new Robot(RobotArenaSettings.robotName.getText(),
+          robot = new RobotInfoImpl(RobotArenaSettings.robotName.getText(),
                           (Integer)RobotArenaSettings.posXSpinner.getValue(),
                           (Integer)RobotArenaSettings.posYSpinner.getValue(),
+                          (String)RobotArenaSettings.imageList.getSelectedItem(),
                           (RobotAI)RobotArenaSettings.aiList.getSelectedItem());
 
           boolean robotAdded = RobotArenaSettings.addRobot(robot);
@@ -44,7 +45,7 @@ public class RobotArenaApp {
       }
     }
 
-    // If user cancels the GUI
+    // If user finished the settings then create the arena, else if canceled then print a message and exit
     if(!userCanceled) {
       SwingUtilities.invokeLater(() -> {
         JFrame window = new JFrame("RobotArena");
@@ -53,25 +54,12 @@ public class RobotArenaApp {
         JToolBar toolbar = new JToolBar();
         JButton btnStartGame = new JButton("Start");
         JButton btnStopGame = new JButton("Stop");
+
         toolbar.add(btnStartGame);
         toolbar.add(btnStopGame);
 
         btnStartGame.setEnabled(true);
         btnStopGame.setEnabled(false);
-        
-        btnStartGame.addActionListener((event) -> {
-          RobotArenaSettings.log("\n-- Game Started");
-
-          btnStartGame.setEnabled(false);
-          btnStopGame.setEnabled(true);
-        });
-
-        btnStopGame.addActionListener((event) -> {
-          RobotArenaSettings.log("-- Game Stopped");
-
-          btnStartGame.setEnabled(true);
-          btnStopGame.setEnabled(false);
-        });
         
         RobotArenaSettings.logger = new JTextArea();
         JScrollPane loggerArea = new JScrollPane(RobotArenaSettings.logger);
@@ -81,7 +69,7 @@ public class RobotArenaApp {
         RobotArenaSettings.log("Grid initialized:\nwidth:"+ RobotArenaSettings.getArenaWidth() +"  height:"+ RobotArenaSettings.getArenaHeight());
         
         JSplitPane splitPane = new JSplitPane(
-          JSplitPane.HORIZONTAL_SPLIT, arena, RobotArenaSettings.logger);
+        JSplitPane.HORIZONTAL_SPLIT, arena, RobotArenaSettings.logger);
 
         Container contentPane = window.getContentPane();
         contentPane.setLayout(new BorderLayout());
@@ -94,6 +82,21 @@ public class RobotArenaApp {
         window.setVisible(true);
         
         splitPane.setDividerLocation(0.75);
+
+        // Create lambda button events
+        btnStartGame.addActionListener((event) -> {
+          btnStartGame.setEnabled(false);
+          btnStopGame.setEnabled(true);
+
+          arena.start();
+        });
+
+        btnStopGame.addActionListener((event) -> {
+          btnStartGame.setEnabled(true);
+          btnStopGame.setEnabled(false);
+
+          arena.stop();
+        });
       });
     } else {
       System.out.println("User Canceled");
@@ -139,7 +142,7 @@ public class RobotArenaApp {
 
   private static JPanel arenaSettingsPanel() {
     JPanel basePanel = new JPanel();
-    basePanel.setLayout(new GridLayout(3, 1, 5, 5));
+    basePanel.setLayout(new GridLayout(2, 1, 5, 5));
 
     // Arena Size
     JPanel arenaSizePanel = new JPanel();
@@ -175,41 +178,143 @@ public class RobotArenaApp {
   }
 
   private static JPanel robotSettingsPanel() {
-    JPanel basePanel = new JPanel();
-    basePanel.setLayout(new GridLayout(3, 1, 5, 5));
+    JPanel panelBase = new JPanel();
+    GridBagLayout gbPanelBase = new GridBagLayout();
+    GridBagConstraints gbcPanelBase = new GridBagConstraints();
+    panelBase.setLayout(gbPanelBase);
 
     // Robot Name
-    JPanel namePanel = new JPanel();
+    JPanel panelName = new JPanel();
     TitledBorder nameTitle = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)
                                      , "Name");
-    namePanel.setBorder(nameTitle);
-    namePanel.add(RobotArenaSettings.robotName);
-    basePanel.add(namePanel);
+    panelName.setBorder(nameTitle);
+    panelName.setLayout(new GridLayout(1, 1, 5, 5));
+
+    panelName.add(RobotArenaSettings.robotName);
+
+    // Name Set Constrain on base panel
+    gridBagSetup(gbcPanelBase,
+                 0,0,8,2,
+                 GridBagConstraints.BOTH,
+                 1,0,
+                 GridBagConstraints.NORTH);
+    gbPanelBase.setConstraints(panelName, gbcPanelBase);
+    panelBase.add(panelName);
 
     // AI
-    JPanel aiTypePanel = new JPanel();
-    aiTypePanel.setLayout(new GridLayout(1, 1, 5, 5));
-    TitledBorder aiTypeTitle = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)
+    JPanel panelAiType = new JPanel();
+    TitledBorder titleAIType = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)
                                      , "AI Type");
-    aiTypePanel.setBorder(aiTypeTitle);
-    aiTypePanel.add(RobotArenaSettings.aiList);
-    basePanel.add(aiTypePanel);
+    panelAiType.setBorder(titleAIType);
+    panelAiType.setLayout(new GridLayout(1, 1, 5, 5));
+    panelAiType.add(RobotArenaSettings.aiList);
 
-    // Arena Position
-    JPanel arenaPosPanel = new JPanel();
-    TitledBorder arenaPosTitle = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)
+    // AI Set Constrain on base panel
+    gridBagSetup(gbcPanelBase,
+                 0,2,8,2,
+                 GridBagConstraints.BOTH,
+                 1,0,
+                 GridBagConstraints.NORTH);
+    gbPanelBase.setConstraints(panelAiType, gbcPanelBase);
+    panelBase.add(panelAiType);
+
+    // Start Position
+    JPanel panelStartPos = new JPanel();
+    TitledBorder titleStartPos = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)
                                      , "Start Position");
-    arenaPosPanel.setBorder(arenaPosTitle);
-    arenaPosPanel.setLayout(new GridLayout(1, 5, 5, 5));
+    panelStartPos.setBorder(titleStartPos);
+    GridBagLayout gbpanelStartPos = new GridBagLayout();
+    GridBagConstraints gbcpanelStartPos = new GridBagConstraints();
+    panelStartPos.setLayout(gbpanelStartPos);
 
-    arenaPosPanel.add(new JLabel("X:"));
-    arenaPosPanel.add(RobotArenaSettings.posXSpinner);
-    arenaPosPanel.add(new JLabel()); // Blank cell
+    JLabel lblBlank = new JLabel();
+    gridBagSetup(gbcpanelStartPos, 0,0,1,1, GridBagConstraints.BOTH, 1,1, GridBagConstraints.NORTH);
+    gbpanelStartPos.setConstraints(lblBlank, gbcpanelStartPos);
+    panelStartPos.add(lblBlank);
 
-    arenaPosPanel.add(new JLabel("Y:"));
-    arenaPosPanel.add(RobotArenaSettings.posYSpinner);
-    basePanel.add(arenaPosPanel);
+    JLabel lblX = new JLabel("X:");
+    gridBagSetup(gbcpanelStartPos, 1,0,1,1, GridBagConstraints.BOTH, 1,1, GridBagConstraints.NORTH);
+    gbpanelStartPos.setConstraints(lblX, gbcpanelStartPos);
+    panelStartPos.add(lblX);
 
-    return basePanel;
+    gridBagSetup(gbcpanelStartPos, 2,0,2,1, GridBagConstraints.BOTH, 1,1, GridBagConstraints.NORTH);
+    gbpanelStartPos.setConstraints(RobotArenaSettings.posXSpinner, gbcpanelStartPos);
+    panelStartPos.add(RobotArenaSettings.posXSpinner);
+
+    lblBlank = new JLabel();
+    gridBagSetup(gbcpanelStartPos, 4,0,1,1, GridBagConstraints.BOTH, 1,1, GridBagConstraints.NORTH);
+    gbpanelStartPos.setConstraints(lblBlank, gbcpanelStartPos);
+    panelStartPos.add(lblBlank);
+
+    JLabel lblY = new JLabel("Y:");
+    gridBagSetup(gbcpanelStartPos, 5,0,1,1, GridBagConstraints.BOTH, 1,1, GridBagConstraints.NORTH);
+    gbpanelStartPos.setConstraints(lblY, gbcpanelStartPos);
+    panelStartPos.add(lblY);
+
+    gridBagSetup(gbcpanelStartPos, 6,0,2,1, GridBagConstraints.BOTH, 1,1, GridBagConstraints.NORTH);
+    gbpanelStartPos.setConstraints(RobotArenaSettings.posYSpinner, gbcpanelStartPos);
+    panelStartPos.add(RobotArenaSettings.posYSpinner);
+
+    lblBlank = new JLabel();
+    gridBagSetup(gbcpanelStartPos, 8,0,1,1, GridBagConstraints.BOTH, 1,1, GridBagConstraints.NORTH);
+    gbpanelStartPos.setConstraints(lblBlank, gbcpanelStartPos);
+    panelStartPos.add(lblBlank);
+
+    // Start Pos Set Constrain on base panel
+    gridBagSetup(gbcPanelBase,
+                 0,4,8,3,
+                 GridBagConstraints.BOTH,
+                 0,1,
+                 GridBagConstraints.NORTH);
+    gbPanelBase.setConstraints(panelStartPos, gbcPanelBase);
+    panelBase.add(panelStartPos);
+
+    // Robot Image
+    JPanel panelImage = new JPanel();
+    GridBagLayout gbPanelImage = new GridBagLayout();
+    GridBagConstraints gbcPanelImage = new GridBagConstraints();
+    panelImage.setLayout(gbPanelImage);
+
+    gridBagSetup(gbcPanelImage,
+                 0,0,1,4,
+                 GridBagConstraints.BOTH,
+                 1,1,
+                 GridBagConstraints.NORTH);
+    gbPanelImage.setConstraints(RobotArenaSettings.robotImage, gbcPanelImage);
+    panelImage.add(RobotArenaSettings.robotImage);
+
+    gridBagSetup(gbcPanelImage,
+                 0,5,1,1,
+                 GridBagConstraints.BOTH,
+                 1,1,
+                 GridBagConstraints.NORTH);
+    gbPanelImage.setConstraints(RobotArenaSettings.imageList, gbcPanelImage);
+    panelImage.add(RobotArenaSettings.imageList);
+
+    // Image Set Constrain on base panel
+    gridBagSetup(gbcPanelBase,
+                 9,0,9,7,
+                 GridBagConstraints.BOTH,
+                 1,0,
+                 GridBagConstraints.NORTH);
+    gbPanelBase.setConstraints(panelImage, gbcPanelBase);
+    panelBase.add(panelImage);
+
+    return panelBase;
+  }
+
+  private static void gridBagSetup(GridBagConstraints gdc,
+                            int gridX, int gridY, int gridW, int gridH,
+                            int fill,
+                            int weightX, int weightY,
+                            int anchor) {
+    gdc.gridx = gridX;
+    gdc.gridy = gridY;
+    gdc.gridwidth = gridW;
+    gdc.gridheight = gridH;
+    gdc.fill = fill;
+    gdc.weightx = weightX;
+    gdc.weighty = weightY;
+    gdc.anchor = anchor;
   }
 }

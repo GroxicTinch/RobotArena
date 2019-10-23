@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies{
-  implementation project(':aiDefault'), project(':aiTwo'), project(':aiDependencies')
+  implementation project(':aiDependencies'), project(':aiDefault'), project(':aiRandomMove'), project(':aiSeeker'), project(':aiRunner')
 }
 
 jar {

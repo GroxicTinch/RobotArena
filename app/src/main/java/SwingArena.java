@@ -2,7 +2,9 @@ package robotarena;
 
 import java.awt.*;
 import javax.swing.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 // Control overall game
@@ -15,22 +17,101 @@ import java.util.Map;
  */
 public class SwingArena extends JPanel {
   private double gridSquareSize; // Auto-calculated
+  private int livingRobots;
+
+  private static SwingArena instance;
+
+  private ArrayList<Shot> robotShots;
   
   /**
    * Creates a new arena object
    */
-  public SwingArena() {}
+  public SwingArena() {
+    instance = this;
+    robotShots = new ArrayList<Shot>();
+  }
+
+  public static SwingArena getInstance() { return instance; }
+
+  // Starts and stops all threads related to the game progressing.
+  public void start() {
+    //RobotArenaSettings.logClear();
+    RobotArenaSettings.log("-- Game Started");
+    RobotControl robotControlBlank = new RobotControlImpl();
+    RobotInfo[] robotInfoArray = robotControlBlank.getAllRobots();
+
+    livingRobots = robotInfoArray.length;
+
+    for(int i = 0; i < robotInfoArray.length; i++) {
+      RobotInfo robot = robotInfoArray[i];
+
+      robot.reset();
+
+      RobotArenaSettings.log(robot.getName() +" has been added to the arena!" +
+                           "\nWeighing in at "+ robot.getHealth() +" stamina" +
+                           "\nStarting at X:"+ (robot.getX()+1) +" Y:"+ (robot.getY()+1) +
+                           "\nWith the "+ robot.getAI().toString() +" brain\n");
+
+      Runnable robotTask = () -> {
+        try {
+          RobotAI robotAI = robot.getAI();
+          robotAI.runAI(robot.getControl());
+        } catch (InterruptedException e) {
+
+        }
+      };
+
+      robot.setAndStartThread(new Thread(robotTask, robot.getName() +"s thread"));
+    }
+  }
+
+  public void stop() {
+    RobotControl robotControlBlank = new RobotControlImpl();
+    RobotInfo[] robotInfoArray = robotControlBlank.getAllRobots();
+    for(int i = 0; i < robotInfoArray.length; i++) {
+      robotInfoArray[i].stopThread();
+    }
+
+    livingRobots = 0;
+
+    RobotArenaSettings.log("-- Game Stopped");
+
+    repaint();
+  }
   
   /**
    * Moves a robot image to a new grid position. This method is a *demonstration* of how you
    * can do such things, and you may want or need to modify it substantially.
    */
-  public void setRobotPosition(double x, double y) {
-    /*robotX = x;
-    robotY = y;*/
+  public void setRobotPosition(RobotInfo robot, int x, int y) {
+    // [FIXME] add thread protection
+    if(robot != null) {
+      robot.setPos(x, y);
+    }
     repaint();
   }
-  
+
+  public void shoot(RobotInfo fromRobot, int x, int y) {
+    // [TODO] add thread safety
+    robotShots.add(new Shot(fromRobot.getX(), fromRobot.getY(), x, y));
+    
+    RobotInfo hurtRobot = (new RobotControlImpl()).isGridCellOccupied(x, y);
+    if(hurtRobot != null) {
+      boolean isDead = hurtRobot.damage(35);
+      RobotArenaSettings.log(fromRobot.getName() +" shot "+ hurtRobot.getName() +" for 35 damage");
+
+      if(isDead) {
+        livingRobots--;
+        hurtRobot.stopThread();
+        RobotArenaSettings.log("The damage was fatal, killing "+ hurtRobot.getName());
+
+        if(livingRobots <= 1) {
+          RobotArenaSettings.log("All Other Robots are Dead, Game Over");
+          stop();
+        }
+      }
+    }
+  }
   
   /**
    * This method is called in order to redraw the screen, either because the user is manipulating 
@@ -79,11 +160,32 @@ public class SwingArena extends JPanel {
     for(int i = 0; i < robotInfoArray.length; i++) {
       drawImage(gfx, robotInfoArray[i].getImage(), robotInfoArray[i].getX(), robotInfoArray[i].getY());
       drawLabel(gfx, robotInfoArray[i].getName() +" ("+ robotInfoArray[i].getHealth() +"%)", robotInfoArray[i].getX(), robotInfoArray[i].getY());
-      //drawLine(gfx, robotX, robotY, robotX + 1.0, robotY - 2.0);
     }
-    
+
+    Iterator<Shot> iterator = robotShots.iterator();
+
+    while(iterator.hasNext()) {
+      Shot shot = iterator.next();
+      if(shot != null && shot.stillAlive()) {
+        drawLine(gfx, shot.x1, shot.y1, shot.x2, shot.y2);
+      } else {
+        iterator.remove();
+      }
+    }
   }
   
+/*
+
+
+
+    
+
+  Modifying below this line should not be required.
+
+
+
+
+ */
   
   /** 
    * Draw an image in a specific grid location. *Only* call this from within paintComponent(). 
