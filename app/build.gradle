@@ -1,6 +1,6 @@
 plugins {
-    id 'java'
-    id 'application'
+  id 'java'
+  id 'application'
 }
 
 dependencies{
@@ -8,11 +8,11 @@ dependencies{
 }
 
 jar {
-    manifest {
-        attributes 'Main-Class': 'robotarena.RobotArenaApp'
-    }
+  manifest {
+    attributes 'Main-Class': 'robotarena.RobotArenaApp'
+  }
 }
 
 application {
-    mainClassName = 'robotarena.RobotArenaApp'
+  mainClassName = 'robotarena.RobotArenaApp'
 }

@@ -59,8 +59,7 @@ public class RobotAISeeker implements RobotAI {
         }
       }
 
-      // Choose a random direction, if that fails then go in the next direction, clockwise
-      
+      // Move towards the closest robot, if it cannot move that direction then choose the next direction.
       boolean moved = false;
 
       while(!moved) {

@@ -1,7 +1,42 @@
 plugins {
-    id 'java'
+  id 'java'
+  id 'c'
 }
+
+defaultTasks 'setLibraryPath'
 
 dependencies {
   implementation project(':aiDependencies')
+}
+
+model {
+  platforms {
+    x86 {
+      architecture "x86"
+    }
+    x64 {
+      architecture "x86_64"
+    }
+  }
+  components {
+    aiRandomMove(NativeLibrarySpec) {
+
+      targetPlatform "x64"
+      sources {
+        c {
+          source {
+            // Compile all .cpp files in src/main/c & subdirectories.
+            srcDirs 'src/main/c'
+            include '**/*.c'
+          }
+        }
+      }
+
+      binaries.all {
+        cCompiler.args "-I$System.env.JAVA_HOME/include"
+        cCompiler.args "-I$System.env.JAVA_HOME/include/linux"
+        cCompiler.args "-I$System.env.JAVA_HOME/include/win32"
+      }
+    }
+  }
 }

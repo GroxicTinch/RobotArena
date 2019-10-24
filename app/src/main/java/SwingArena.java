@@ -9,8 +9,7 @@ import java.util.Map;
 
 // Control overall game
 // Provide info to each virtual robot
-// Display what happens
-// Starts up each AI Instance with runAI(RobotControl obj) (obj must be different)
+// [FIXME] make stop actually stop the aiRandomMove
 
 /**
  * A Swing GUI element that displays a grid on which you can draw images, text and lines.

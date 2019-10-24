@@ -3,11 +3,6 @@ package robotarena;
 import java.util.HashMap;
 import java.util.Map;
 
-// RobotControl
-//   retrieves information, perform actions.
-//   must interact with rest of code
-//   move...() and fire() must return true if action is legal+carried out or false if it would have broken a rule(doesnt indicate a hit)
-
 interface RobotControl {
   static HashMap<String, RobotInfo> robots = new HashMap<String, RobotInfo>();
 

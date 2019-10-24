@@ -1,15 +1,5 @@
 package robotarena;
 
-// AI classes
-//   Implements RobotAI
-//   must create two or more
-//   Each is a different kind of AI
-//   Must be two or more active in a game
-//   Each instance controls a particular robot
-//   Must run in its own thread
-//   Uses RobotControl
-//   Gets name, grid location and hp of all robots via RobotInfo
-
 public class RobotAIRunner implements RobotAI {
 
   public RobotAIRunner() {}
@@ -59,8 +49,7 @@ public class RobotAIRunner implements RobotAI {
         }
       }
 
-      // Choose a random direction, if that fails then go in the next direction, clockwise
-      
+      // Move away from the closest robot, if it bumps into something choose the next direction
       boolean moved = false;
 
       while(!moved) {
