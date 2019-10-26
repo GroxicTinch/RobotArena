@@ -3,8 +3,6 @@ plugins {
   id 'c'
 }
 
-defaultTasks 'setLibraryPath'
-
 dependencies {
   implementation project(':aiDependencies')
 }
@@ -20,7 +18,6 @@ model {
   }
   components {
     aiRandomMove(NativeLibrarySpec) {
-
       targetPlatform "x64"
       sources {
         c {

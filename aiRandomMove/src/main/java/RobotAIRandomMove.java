@@ -1,7 +1,6 @@
 package robotarena;
 
 public class RobotAIRandomMove implements RobotAI {
-
   static {//[FIXME] Need to make project auto build native code
     try {
       System.loadLibrary("aiRandomMove");

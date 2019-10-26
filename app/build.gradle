@@ -1,6 +1,22 @@
 plugins {
   id 'java'
   id 'application'
+  id 'distribution'
+}
+
+run.doFirst {
+  systemProperty "java.library.path", "${project(':aiRandomMove').buildDir}/libs/aiRandomMove/shared"
+}
+
+distributions {
+  main {
+    baseName = 'RobotArenaDist'
+    contents {
+      into ('bin') {
+        from "${project(':aiRandomMove').buildDir}/libs/aiRandomMove/shared"
+      }
+    }
+  }
 }
 
 dependencies{

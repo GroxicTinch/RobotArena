@@ -93,7 +93,7 @@ public class SwingArena extends JPanel {
   public void shoot(RobotInfo fromRobot, int x, int y) {
     // [TODO] add thread safety
     robotShots.add(new Shot(fromRobot.getX(), fromRobot.getY(), x, y));
-    
+    repaint();
     RobotInfo hurtRobot = (new RobotControlImpl()).isGridCellOccupied(x, y);
     if(hurtRobot != null) {
       boolean isDead = hurtRobot.damage(35);

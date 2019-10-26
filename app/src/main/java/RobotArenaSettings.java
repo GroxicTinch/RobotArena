@@ -23,7 +23,7 @@ public class RobotArenaSettings {
   final static int MINWIDTH = 8;
   final static int MAXWIDTH = 15;
 
-  final static int MINHEIGHT = 1;
+  final static int MINHEIGHT = 8;
   final static int MAXHEIGHT = 15;
 
   final static int MAXROBOTS = 4; // [TODO] find a better number

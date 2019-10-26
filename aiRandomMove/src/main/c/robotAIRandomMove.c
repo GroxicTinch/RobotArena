@@ -16,8 +16,7 @@
 
 JNIEXPORT void JNICALL Java_robotarena_RobotAIRandomMove_runAI(JNIEnv *env, jobject this,
                                                                jobject robotControl) {
-  int myX;
-  int myY;
+  int hasSetSeed = 0;
 
   // Defining RobotControl
   jclass robotControl_C = (*env)->GetObjectClass(env, robotControl);
@@ -34,17 +33,24 @@ JNIEXPORT void JNICALL Java_robotarena_RobotAIRandomMove_runAI(JNIEnv *env, jobj
 
   // Defining RobotInfo
   jclass robotInfo_C = (*env)->GetObjectClass(env, myRobot);
+  jmethodID robotInfo_getThread = (*env)->GetMethodID(env, robotInfo_C, "getThread", "()Ljava/lang/Thread;");
   jmethodID robotInfo_getName = (*env)->GetMethodID(env, robotInfo_C, "getName", "()Ljava/lang/String;");
   jmethodID robotInfo_isAlive = (*env)->GetMethodID(env, robotInfo_C, "isAlive", "()Z");
   jmethodID robotInfo_getX = (*env)->GetMethodID(env, robotInfo_C, "getX", "()I");
   jmethodID robotInfo_getY = (*env)->GetMethodID(env, robotInfo_C, "getY", "()I");
 
-  while(1) {
-
+  while((*env)->CallObjectMethod(env, myRobot, robotInfo_getThread) != NULL) {
     // robotArray[] = robotControl.getAllRobots();
     jobjectArray robotInfoArray = (*env)->CallObjectMethod(env, robotControl, robotControl_getAllRobots);
 
     int robotCount = (*env)->GetArrayLength(env, robotInfoArray);
+
+    int myX;
+    int myY;
+
+    // robot.getX and robot.getY()
+    myX = (*env)->CallIntMethod(env, myRobot, robotInfo_getX);
+    myY = (*env)->CallIntMethod(env, myRobot, robotInfo_getY);
 
     // Shoot at the first robot found that is in range
     int i;
@@ -69,12 +75,8 @@ JNIEXPORT void JNICALL Java_robotarena_RobotAIRandomMove_runAI(JNIEnv *env, jobj
         // robot.isAlive();
         jboolean isAlive = (*env)->CallBooleanMethod(env, robotInfo, robotInfo_isAlive);
         if(isAlive == JNI_TRUE) {
-          // robot.getX and robot.getY()
-          myX = (*env)->CallIntMethod(env, robotInfo, robotInfo_getX);
-          myY = (*env)->CallIntMethod(env, robotInfo, robotInfo_getY);
-
           int robotX = (*env)->CallIntMethod(env, robotInfo, robotInfo_getX);
-          int robotY = (*env)->CallIntMethod(env, robotInfo, robotInfo_getX);
+          int robotY = (*env)->CallIntMethod(env, robotInfo, robotInfo_getY);
 
           if(abs(myX - robotX) <= 2 &&
              abs(myY - robotY) <= 2) {
@@ -95,6 +97,11 @@ JNIEXPORT void JNICALL Java_robotarena_RobotAIRandomMove_runAI(JNIEnv *env, jobj
     }
 
     // Choose a random direction, if that fails then go in the next direction clockwise
+    if(hasSetSeed == 0) {
+      // Doesn't matter that we are casting an int to an unsigned int as we dont need the exact value
+      // it just needs to be different than the other robots that use the same AI
+      srand(time(0) + (unsigned int)(myX + myY));
+    }
     int dir = rand() % 4;
 
     int moved = 0;
