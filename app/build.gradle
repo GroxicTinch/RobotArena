@@ -4,9 +4,14 @@ plugins {
   id 'distribution'
 }
 
-run.doFirst {
-  systemProperty "java.library.path", "${project(':aiRandomMove').buildDir}/libs/aiRandomMove/shared"
+run {
+  dependsOn project(':aiRandomMove').build
+  doFirst {
+    systemProperty "java.library.path", "${project(':aiRandomMove').buildDir}/libs/aiRandomMove/shared"
+  }
 }
+
+distZip.dependsOn project(':aiRandomMove').build
 
 distributions {
   main {
