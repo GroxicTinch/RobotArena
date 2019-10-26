@@ -4,6 +4,7 @@ plugins {
   id 'distribution'
 }
 
+// If running the project, make sure to build the native .dll and set its path as a java library path.
 run {
   dependsOn project(':aiRandomMove').build
   doFirst {
@@ -11,6 +12,8 @@ run {
   }
 }
 
+// Before creating a .zip, make sure the native .dll is built and then include it in the .zip
+// copying it to the same directory as the executable should remove the need to set a library path.
 distZip.dependsOn project(':aiRandomMove').build
 
 distributions {

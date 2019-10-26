@@ -19,6 +19,7 @@ model {
   components {
     aiRandomMove(NativeLibrarySpec) {
       targetPlatform "x64"
+      targetPlatform "x86"
       sources {
         c {
           source {
