@@ -1,15 +1,5 @@
 package robotarena;
 
-// AI classes
-//   Implements RobotAI
-//   must create two or more
-//   Each is a different kind of AI
-//   Must be two or more active in a game
-//   Each instance controls a particular robot
-//   Must run in its own thread
-//   Uses RobotControl
-//   Gets name, grid location and hp of all robots via RobotInfo
-
 public class RobotAISeeker implements RobotAI {
 
   public RobotAISeeker() {}
@@ -19,6 +9,7 @@ public class RobotAISeeker implements RobotAI {
     return "Seeker";
   }
 
+  /* Based on psudocode from David Cooper, SEC_2019s2_Assignment.pdf */
   public void runAI(RobotControl robotControl) throws InterruptedException {
     RobotInfo myRobot = robotControl.getRobot();
     Direction dir = Direction.NORTH;

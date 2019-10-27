@@ -9,6 +9,7 @@ public class RobotAIDefault implements RobotAI {
     return "Default";
   }
 
+  /* Based on psudocode from David Cooper, SEC_2019s2_Assignment.pdf */
   public void runAI(RobotControl robotControl) throws InterruptedException {
     Direction dir = Direction.NORTH;
 

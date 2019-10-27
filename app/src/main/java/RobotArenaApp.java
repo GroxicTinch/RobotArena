@@ -6,6 +6,7 @@ import java.text.ParseException;
 import javax.swing.*;
 import javax.swing.border.*;
 
+/* Based on code from David Cooper, arena.zip/swing/ExampleSwingApp.java */
 public class RobotArenaApp {
   public static void main(String[] args) {
     boolean userCanceled = false;
@@ -52,14 +53,18 @@ public class RobotArenaApp {
         SwingArena arena = new SwingArena();
         
         JToolBar toolbar = new JToolBar();
-        JButton btnStartGame = new JButton("Start");
-        JButton btnStopGame = new JButton("Stop");
+        RobotArenaSettings.btnStart = new JButton("Start");
+        RobotArenaSettings.btnStop = new JButton("Stop");
 
-        toolbar.add(btnStartGame);
-        toolbar.add(btnStopGame);
+        JButton btnClearLog = new JButton("Clear Log");
 
-        btnStartGame.setEnabled(true);
-        btnStopGame.setEnabled(false);
+        toolbar.add(RobotArenaSettings.btnStart);
+        toolbar.add(RobotArenaSettings.btnStop);
+        toolbar.add(Box.createHorizontalGlue());
+        toolbar.add(btnClearLog);
+
+        RobotArenaSettings.btnStart.setEnabled(true);
+        RobotArenaSettings.btnStop.setEnabled(false);
         
         RobotArenaSettings.logger = new JTextArea();
         JScrollPane loggerArea = new JScrollPane(RobotArenaSettings.logger);
@@ -84,18 +89,16 @@ public class RobotArenaApp {
         splitPane.setDividerLocation(0.75);
 
         // Create lambda button events
-        btnStartGame.addActionListener((event) -> {
-          btnStartGame.setEnabled(false);
-          btnStopGame.setEnabled(true);
-
+        RobotArenaSettings.btnStart.addActionListener((event) -> {
           arena.start();
         });
 
-        btnStopGame.addActionListener((event) -> {
-          btnStartGame.setEnabled(true);
-          btnStopGame.setEnabled(false);
-
+        RobotArenaSettings.btnStop.addActionListener((event) -> {
           arena.stop();
+        });
+
+        btnClearLog.addActionListener((event) -> {
+          RobotArenaSettings.logClear();
         });
       });
     } else {
@@ -223,41 +226,41 @@ public class RobotArenaApp {
     TitledBorder titleStartPos = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)
                                      , "Start Position");
     panelStartPos.setBorder(titleStartPos);
-    GridBagLayout gbpanelStartPos = new GridBagLayout();
-    GridBagConstraints gbcpanelStartPos = new GridBagConstraints();
-    panelStartPos.setLayout(gbpanelStartPos);
+    GridBagLayout gbPanelStartPos = new GridBagLayout();
+    GridBagConstraints gbcPanelStartPos = new GridBagConstraints();
+    panelStartPos.setLayout(gbPanelStartPos);
 
     JLabel lblBlank = new JLabel();
-    gridBagSetup(gbcpanelStartPos, 0,0,1,1, GridBagConstraints.BOTH, 1,1, GridBagConstraints.NORTH);
-    gbpanelStartPos.setConstraints(lblBlank, gbcpanelStartPos);
+    gridBagSetup(gbcPanelStartPos, 0,0,1,1, GridBagConstraints.BOTH, 1,1, GridBagConstraints.NORTH);
+    gbPanelStartPos.setConstraints(lblBlank, gbcPanelStartPos);
     panelStartPos.add(lblBlank);
 
     JLabel lblX = new JLabel("X:");
-    gridBagSetup(gbcpanelStartPos, 1,0,1,1, GridBagConstraints.BOTH, 1,1, GridBagConstraints.NORTH);
-    gbpanelStartPos.setConstraints(lblX, gbcpanelStartPos);
+    gridBagSetup(gbcPanelStartPos, 1,0,1,1, GridBagConstraints.BOTH, 1,1, GridBagConstraints.NORTH);
+    gbPanelStartPos.setConstraints(lblX, gbcPanelStartPos);
     panelStartPos.add(lblX);
 
-    gridBagSetup(gbcpanelStartPos, 2,0,2,1, GridBagConstraints.BOTH, 1,1, GridBagConstraints.NORTH);
-    gbpanelStartPos.setConstraints(RobotArenaSettings.posXSpinner, gbcpanelStartPos);
+    gridBagSetup(gbcPanelStartPos, 2,0,2,1, GridBagConstraints.BOTH, 1,1, GridBagConstraints.NORTH);
+    gbPanelStartPos.setConstraints(RobotArenaSettings.posXSpinner, gbcPanelStartPos);
     panelStartPos.add(RobotArenaSettings.posXSpinner);
 
     lblBlank = new JLabel();
-    gridBagSetup(gbcpanelStartPos, 4,0,1,1, GridBagConstraints.BOTH, 1,1, GridBagConstraints.NORTH);
-    gbpanelStartPos.setConstraints(lblBlank, gbcpanelStartPos);
+    gridBagSetup(gbcPanelStartPos, 4,0,1,1, GridBagConstraints.BOTH, 1,1, GridBagConstraints.NORTH);
+    gbPanelStartPos.setConstraints(lblBlank, gbcPanelStartPos);
     panelStartPos.add(lblBlank);
 
     JLabel lblY = new JLabel("Y:");
-    gridBagSetup(gbcpanelStartPos, 5,0,1,1, GridBagConstraints.BOTH, 1,1, GridBagConstraints.NORTH);
-    gbpanelStartPos.setConstraints(lblY, gbcpanelStartPos);
+    gridBagSetup(gbcPanelStartPos, 5,0,1,1, GridBagConstraints.BOTH, 1,1, GridBagConstraints.NORTH);
+    gbPanelStartPos.setConstraints(lblY, gbcPanelStartPos);
     panelStartPos.add(lblY);
 
-    gridBagSetup(gbcpanelStartPos, 6,0,2,1, GridBagConstraints.BOTH, 1,1, GridBagConstraints.NORTH);
-    gbpanelStartPos.setConstraints(RobotArenaSettings.posYSpinner, gbcpanelStartPos);
+    gridBagSetup(gbcPanelStartPos, 6,0,2,1, GridBagConstraints.BOTH, 1,1, GridBagConstraints.NORTH);
+    gbPanelStartPos.setConstraints(RobotArenaSettings.posYSpinner, gbcPanelStartPos);
     panelStartPos.add(RobotArenaSettings.posYSpinner);
 
     lblBlank = new JLabel();
-    gridBagSetup(gbcpanelStartPos, 8,0,1,1, GridBagConstraints.BOTH, 1,1, GridBagConstraints.NORTH);
-    gbpanelStartPos.setConstraints(lblBlank, gbcpanelStartPos);
+    gridBagSetup(gbcPanelStartPos, 8,0,1,1, GridBagConstraints.BOTH, 1,1, GridBagConstraints.NORTH);
+    gbPanelStartPos.setConstraints(lblBlank, gbcPanelStartPos);
     panelStartPos.add(lblBlank);
 
     // Start Pos Set Constrain on base panel

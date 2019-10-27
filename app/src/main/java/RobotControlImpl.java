@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RobotControlImpl implements RobotControl {
-  static HashMap<String, RobotInfo> robots = new HashMap<String, RobotInfo>();
+  private static HashMap<String, RobotInfo> robots = new HashMap<String, RobotInfo>();
 
   public RobotInfo robotInfo;
 

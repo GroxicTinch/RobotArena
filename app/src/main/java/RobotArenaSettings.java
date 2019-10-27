@@ -9,10 +9,10 @@ import java.util.Map;
 
 
 public class RobotArenaSettings {
-  static boolean arenaSaved;
+  private static boolean arenaSaved;
 
   // Available AI Implementations
-  final static RobotAI[] robotAIs = {
+  private final static RobotAI[] robotAIs = {
     new RobotAIDefault(),
     new RobotAIRandomMove(),
     new RobotAISeeker(),
@@ -20,20 +20,29 @@ public class RobotArenaSettings {
   };
 
   // Limits
-  final static int MINWIDTH = 8;
-  final static int MAXWIDTH = 15;
+  private final static int MINWIDTH = 8;
+  private final static int MAXWIDTH = 15;
 
-  final static int MINHEIGHT = 8;
-  final static int MAXHEIGHT = 15;
+  private final static int MINHEIGHT = 8;
+  private final static int MAXHEIGHT = 15;
 
-  final static int MAXROBOTS = 4; // [TODO] find a better number
+  private final static int MAXROBOTS = 4; // [TODO] find a better number
 
-  final static int ROBOTIMAGESIZE = 100;
+  private final static int ROBOTIMAGESIZE = 100;
 
   // Default Values
-  final static int DEFAULTWIDTH = 12;
-  final static int DEFAULTHEIGHT = 8;
+  private final static int DEFAULTWIDTH = 12;
+  private final static int DEFAULTHEIGHT = 8;
 
+  // Vars
+  private static int arenaWidth;
+  private static int arenaHeight;
+
+  private static int robotCount;
+
+  private static String failReason;
+
+  // Public Variables
   // JPanel Controls
   // Arena Controls
   // SpinnerNumberModel(defaultValue, min, max, step);
@@ -52,21 +61,13 @@ public class RobotArenaSettings {
   public static JComboBox aiList;
   public static JComboBox imageList;
 
-  static ArrayList<String> robotNames;
-  static ArrayList<String> robotImages;
+  private static ArrayList<String> robotNames;
+  private static ArrayList<String> robotImages;
 
   // Main Controls
   public static JTextArea logger;
-
-  // Vars
-  static int arenaWidth;
-  static int arenaHeight;
-
-  static int robotCount;
-
-  static String failReason;
-
-  // [TODO] AI Type for each robot
+  public static JButton btnStart;
+  public static JButton btnStop;
 
   public static void init() {
     arenaSaved = false;
@@ -176,13 +177,15 @@ public class RobotArenaSettings {
   }
 
   public static void log(String msg) {
-    // TODO make threadsafe
-    logger.append(msg +"\n");
+    SwingUtilities.invokeLater(() -> {
+      logger.append(msg +"\n");
+    });
   }
 
   public static void logClear() {
-    // TODO make threadsafe
-    logger.setText("");
+    SwingUtilities.invokeLater(() -> {
+      logger.setText("");
+    });
   }
 
   public static void saveArenaSettings() {

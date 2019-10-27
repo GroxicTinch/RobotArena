@@ -14,22 +14,23 @@ import javax.swing.ImageIcon;
 public class RobotInfoImpl implements RobotInfo {
   private static final String DEF_IMAGE_FILE = "1554047213";
     
-  RobotAI robotAI;
-  RobotControl robotControl;
-  Thread thread;
+  private RobotAI robotAI;
+  private RobotControl robotControl;
+  private Thread thread;
 
-  String name;
+  private String name;
   // Represents the image to draw.
-  ImageIcon image;
+  private ImageIcon image;
 
   // Default variables
-  int[] defPos;
-  double defHealth;
+  private int[] defPos;
+  private double defHealth;
 
   // Current variables
-  int[] currPos;
-  double currHealth;
+  private int[] currPos;
+  private double currHealth;
 
+  private Object mutex = new Object();
 
   public RobotInfoImpl(String nameIn, int xIn, int yIn, RobotAI robotAIIn) {
     this(nameIn, xIn, yIn, 100.0, DEF_IMAGE_FILE, robotAIIn);
@@ -60,63 +61,75 @@ public class RobotInfoImpl implements RobotInfo {
   }
 
   public void reset() {
-    currPos[0] = defPos[0];
-    currPos[1] = defPos[1];
+    synchronized(mutex) {
+      currPos[0] = defPos[0];
+      currPos[1] = defPos[1];
 
-    currHealth = defHealth;
+      currHealth = defHealth;
+    }
   }
 
   public void setPos(int x, int y) {
-    currPos[0] = x;
-    currPos[1] = y;
+    synchronized(mutex) {
+      currPos[0] = x;
+      currPos[1] = y;
+    }
   }
 
   public boolean damage(double amount) {
     boolean isDead = false;
 
-    currHealth -= amount;
+    synchronized(mutex) {
+      currHealth -= amount;
 
-    if(!isAlive()) {
-      currHealth = 0;
-      isDead = true;
+      if(!isAlive()) {
+        currHealth = 0;
+        isDead = true;
+      }
     }
 
     return isDead;
   }
 
   public boolean isAlive() {
-    return (currHealth > 0);
+    synchronized(mutex) {
+      return (currHealth > 0);
+    }
   }
 
   public void setAndStartThread(Thread threadIn) {
-    if(thread != null) {
-      thread.interrupt();
-    }
+    synchronized(mutex) {
+      if(thread != null) {
+        thread.interrupt();
+      }
 
-    thread = threadIn;
-    thread.start();
+      thread = threadIn;
+      thread.start();
+    }
   }
 
   public void stopThread() {
-    if(thread != null) {
-      thread.interrupt();
-      thread = null;
+    synchronized(mutex) {
+      if(thread != null) {
+        thread.interrupt();
+        thread = null;
+      }
     }
   }
 
-  public Thread getThread() {return thread;}
+  public Thread getThread() {synchronized(mutex) {return thread;}}
 
   public String getName() {return name;}
-  public ImageIcon getImage() { return image; }
+  public ImageIcon getImage() {return image;}
 
-  public int getDefX() {return currPos[0];}
-  public int getDefY() {return currPos[1];}
-  public double getDefHealth() {return currHealth;}
+  public int getDefX() {return defPos[0];}
+  public int getDefY() {return defPos[1];}
+  public double getDefHealth() {return defHealth;}
 
-  public int getX() {return currPos[0];}
-  public int getY() {return currPos[1];}
-  public double getHealth() {return currHealth;}
+  public int getX() {synchronized(mutex) {return currPos[0];}}
+  public int getY() {synchronized(mutex) {return currPos[1];}}
+  public double getHealth() {synchronized(mutex) {return currHealth;}}
 
-  public RobotAI getAI() { return robotAI; }
-  public RobotControl getControl() { return robotControl; }
+  public RobotAI getAI() {return robotAI;}
+  public RobotControl getControl() {return robotControl;}
 }

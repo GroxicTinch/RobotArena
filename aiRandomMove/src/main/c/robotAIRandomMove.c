@@ -14,6 +14,7 @@
   }
 #endif
 
+/* Based on psudocode from David Cooper, SEC_2019s2_Assignment.pdf */
 JNIEXPORT void JNICALL Java_robotarena_RobotAIRandomMove_runAI(JNIEnv *env, jobject this,
                                                                jobject robotControl) {
   int hasSetSeed = 0;
@@ -67,11 +68,15 @@ JNIEXPORT void JNICALL Java_robotarena_RobotAIRandomMove_runAI(JNIEnv *env, jobj
 
       int isMe = strncmp(myNameChars, robotNameChars, strlen(myNameChars));
 
+      // printf("I am %s, I am checking %s\n", myNameChars, robotNameChars);
+
       (*env)->ReleaseStringUTFChars(env, myName, myNameChars);
       (*env)->ReleaseStringUTFChars(env, robotName, robotNameChars);
 
       // if isMe is 0 then myName and robotName is equal, value can be less or greater than 0
       if(isMe != 0) {
+        // printf("That is not me\n");
+
         // robot.isAlive();
         jboolean isAlive = (*env)->CallBooleanMethod(env, robotInfo, robotInfo_isAlive);
         if(isAlive == JNI_TRUE) {
@@ -84,6 +89,9 @@ JNIEXPORT void JNICALL Java_robotarena_RobotAIRandomMove_runAI(JNIEnv *env, jobj
             // robotControl.fire(myX, myY)
             (*env)->CallVoidMethod(env, robotControl, robotControl_fire,
                                    myX, myY);
+            // The fire function is what usually does the delay but native code doesn't care about
+            // Thread.sleep() so we must do it ourself.
+            sleep(500);
 
             if((*env)->ExceptionCheck(env)){
               /*Clean up resources if necessary.*/
@@ -101,6 +109,7 @@ JNIEXPORT void JNICALL Java_robotarena_RobotAIRandomMove_runAI(JNIEnv *env, jobj
       // Doesn't matter that we are casting an int to an unsigned int as we dont need the exact value
       // it just needs to be different than the other robots that use the same AI
       srand(time(0) + (unsigned int)(myX + myY));
+      hasSetSeed = 1;
     }
     int dir = rand() % 4;
 

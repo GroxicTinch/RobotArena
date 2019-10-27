@@ -7,9 +7,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+/* Based on code from David Cooper, arena.zip/swing/SwingArena.java */
+
 // Control overall game
 // Provide info to each virtual robot
-// [FIXME] make stop actually stop the aiRandomMove
 
 /**
  * A Swing GUI element that displays a grid on which you can draw images, text and lines.
@@ -21,6 +22,9 @@ public class SwingArena extends JPanel {
   private static SwingArena instance;
 
   private ArrayList<Shot> robotShots;
+
+  // Used for Shots/Lines
+  private Object mutex = new Object();
   
   /**
    * Creates a new arena object
@@ -28,12 +32,29 @@ public class SwingArena extends JPanel {
   public SwingArena() {
     instance = this;
     robotShots = new ArrayList<Shot>();
+
+    Runnable task = () -> {
+      try {
+        while(true) {
+          repaint();
+          Thread.sleep(50);
+        }
+      } catch (InterruptedException e) {
+
+      }
+    };
+
+    Thread t = new Thread(task, "repaint");
+    t.start();
   }
 
   public static SwingArena getInstance() { return instance; }
 
   // Starts and stops all threads related to the game progressing.
   public void start() {
+    RobotArenaSettings.btnStart.setEnabled(false);
+    RobotArenaSettings.btnStop.setEnabled(true);
+
     //RobotArenaSettings.logClear();
     RobotArenaSettings.log("-- Game Started");
     RobotControl robotControlBlank = new RobotControlImpl();
@@ -65,6 +86,9 @@ public class SwingArena extends JPanel {
   }
 
   public void stop() {
+    RobotArenaSettings.btnStart.setEnabled(true);
+    RobotArenaSettings.btnStop.setEnabled(false);
+
     RobotControl robotControlBlank = new RobotControlImpl();
     RobotInfo[] robotInfoArray = robotControlBlank.getAllRobots();
     for(int i = 0; i < robotInfoArray.length; i++) {
@@ -83,7 +107,6 @@ public class SwingArena extends JPanel {
    * can do such things, and you may want or need to modify it substantially.
    */
   public void setRobotPosition(RobotInfo robot, int x, int y) {
-    // [FIXME] add thread protection
     if(robot != null) {
       robot.setPos(x, y);
     }
@@ -91,24 +114,26 @@ public class SwingArena extends JPanel {
   }
 
   public void shoot(RobotInfo fromRobot, int x, int y) {
-    // [TODO] add thread safety
-    robotShots.add(new Shot(fromRobot.getX(), fromRobot.getY(), x, y));
-    repaint();
-    RobotInfo hurtRobot = (new RobotControlImpl()).isGridCellOccupied(x, y);
-    if(hurtRobot != null) {
-      boolean isDead = hurtRobot.damage(35);
-      RobotArenaSettings.log(fromRobot.getName() +" shot "+ hurtRobot.getName() +" for 35 damage");
+    synchronized(mutex) {
+      robotShots.add(new Shot(fromRobot.getX(), fromRobot.getY(), x, y));
+      
+      RobotInfo hurtRobot = (new RobotControlImpl()).isGridCellOccupied(x, y);
+      if(hurtRobot != null) {
+        boolean isDead = hurtRobot.damage(35);
+        RobotArenaSettings.log(fromRobot.getName() +" shot "+ hurtRobot.getName() +" for 35 damage");
 
-      if(isDead) {
-        livingRobots--;
-        hurtRobot.stopThread();
-        RobotArenaSettings.log("The damage was fatal, killing "+ hurtRobot.getName());
+        if(isDead) {
+          livingRobots--;
+          hurtRobot.stopThread();
+          RobotArenaSettings.log("The damage was fatal, killing "+ hurtRobot.getName());
 
-        if(livingRobots <= 1) {
-          RobotArenaSettings.log("All Other Robots are Dead, Game Over");
-          stop();
+          if(livingRobots <= 1) {
+            RobotArenaSettings.log("All Other Robots are Dead, Game Over");
+            stop();
+          }
         }
       }
+      repaint();
     }
   }
   
@@ -157,18 +182,27 @@ public class SwingArena extends JPanel {
     RobotControl robotControlBlank = new RobotControlImpl();
     RobotInfo[] robotInfoArray = robotControlBlank.getAllRobots();
     for(int i = 0; i < robotInfoArray.length; i++) {
+      Color color = Color.BLUE;
+
+      // If the robot is dead then change its label to red to make it show different than the others
+      if(robotInfoArray[i].getHealth() == 0) {
+        color = Color.RED;
+      }
+
       drawImage(gfx, robotInfoArray[i].getImage(), robotInfoArray[i].getX(), robotInfoArray[i].getY());
-      drawLabel(gfx, robotInfoArray[i].getName() +" ("+ robotInfoArray[i].getHealth() +"%)", robotInfoArray[i].getX(), robotInfoArray[i].getY());
+      drawLabel(gfx, robotInfoArray[i].getName() +" ("+ robotInfoArray[i].getHealth() +"%)", robotInfoArray[i].getX(), robotInfoArray[i].getY(), color);
     }
 
-    Iterator<Shot> iterator = robotShots.iterator();
+    synchronized(mutex){
+      Iterator<Shot> iterator = robotShots.iterator();
 
-    while(iterator.hasNext()) {
-      Shot shot = iterator.next();
-      if(shot != null && shot.stillAlive()) {
-        drawLine(gfx, shot.x1, shot.y1, shot.x2, shot.y2);
-      } else {
-        iterator.remove();
+      while(iterator.hasNext()) {
+        Shot shot = iterator.next();
+        if(shot != null && shot.stillAlive()) {
+          drawLine(gfx, shot.x1, shot.y1, shot.x2, shot.y2);
+        } else {
+          iterator.remove();
+        }
       }
     }
   }
@@ -228,15 +262,15 @@ public class SwingArena extends JPanel {
       null);
   }
   
-  
+  // Added color variable
   /**
    * Displays a string of text underneath a specific grid location. *Only* call this from within 
    * paintComponent(). 
    *
    * You shouldn't need to modify this method.
    */
-  private void drawLabel(Graphics2D gfx, String label, double gridX, double gridY) {
-    gfx.setColor(Color.BLUE);
+  private void drawLabel(Graphics2D gfx, String label, double gridX, double gridY, Color color) {
+    gfx.setColor(color);
     FontMetrics fm = gfx.getFontMetrics();
     gfx.drawString(label, 
       (int) ((gridX + 0.5) * gridSquareSize - (double) fm.stringWidth(label) / 2.0), 

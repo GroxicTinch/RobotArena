@@ -9,6 +9,7 @@ public class RobotAIRunner implements RobotAI {
     return "Runner";
   }
 
+  /* Based on psudocode from David Cooper, SEC_2019s2_Assignment.pdf */
   public void runAI(RobotControl robotControl) throws InterruptedException {
     RobotInfo myRobot = robotControl.getRobot();
     Direction dir = Direction.NORTH;
