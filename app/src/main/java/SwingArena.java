@@ -32,6 +32,7 @@ public class SwingArena extends JPanel {
   public SwingArena() {
     instance = this;
     robotShots = new ArrayList<Shot>();
+    livingRobots = 0;
 
     Runnable task = () -> {
       try {
@@ -54,18 +55,24 @@ public class SwingArena extends JPanel {
   public void start() {
     RobotArenaSettings.btnStart.setEnabled(false);
     RobotArenaSettings.btnStop.setEnabled(true);
+    RobotArenaSettings.btnRestart.setEnabled(false);
 
     //RobotArenaSettings.logClear();
     RobotArenaSettings.log("-- Game Started");
     RobotControl robotControlBlank = new RobotControlImpl();
     RobotInfo[] robotInfoArray = robotControlBlank.getAllRobots();
 
+    boolean shouldReset = (livingRobots <= 1);
+
     livingRobots = robotInfoArray.length;
 
     for(int i = 0; i < robotInfoArray.length; i++) {
       RobotInfo robot = robotInfoArray[i];
 
-      robot.reset();
+      // We could call reset instead but that would mean looping the robots twice which would be a waste of resources
+      if(shouldReset) {
+        robot.reset();
+      }
 
       RobotArenaSettings.log(robot.getName() +" has been added to the arena!" +
                            "\nWeighing in at "+ robot.getHealth() +" stamina" +
@@ -88,6 +95,9 @@ public class SwingArena extends JPanel {
   public void stop() {
     RobotArenaSettings.btnStart.setEnabled(true);
     RobotArenaSettings.btnStop.setEnabled(false);
+    if(livingRobots > 1) {
+      RobotArenaSettings.btnRestart.setEnabled(true);      
+    }
 
     RobotControl robotControlBlank = new RobotControlImpl();
     RobotInfo[] robotInfoArray = robotControlBlank.getAllRobots();
@@ -95,11 +105,25 @@ public class SwingArena extends JPanel {
       robotInfoArray[i].stopThread();
     }
 
-    livingRobots = 0;
-
     RobotArenaSettings.log("-- Game Stopped");
 
     repaint();
+  }
+
+  public void restart() {
+    RobotArenaSettings.btnStart.setEnabled(true);
+
+    RobotArenaSettings.log("-- Resetting Robots");
+    RobotControl robotControlBlank = new RobotControlImpl();
+    RobotInfo[] robotInfoArray = robotControlBlank.getAllRobots();
+
+    livingRobots = robotInfoArray.length;
+
+    for(int i = 0; i < robotInfoArray.length; i++) {
+      RobotInfo robot = robotInfoArray[i];
+
+      robot.reset();
+    }
   }
   
   /**
@@ -120,6 +144,21 @@ public class SwingArena extends JPanel {
       RobotInfo hurtRobot = (new RobotControlImpl()).isGridCellOccupied(x, y);
       if(hurtRobot != null) {
         boolean isDead = hurtRobot.damage(35);
+
+        // If a robot has been shot, and the shooter is an AIListener then tell him they hit
+        RobotAI fromRobotAI = fromRobot.getAI();
+        if(fromRobotAI instanceof RobotAIListener) {
+          RobotAIListener fromRobotAIListener = (RobotAIListener)fromRobotAI;
+          fromRobotAIListener.tell(new NotificationMessage(hurtRobot, "hit"));
+        }
+
+        // Likewise, if a robot has been shot tell the victum they have been hurt
+        RobotAI hurtRobotAI = hurtRobot.getAI();
+        if(hurtRobotAI instanceof RobotAIListener) {
+          RobotAIListener hurtRobotAIListener = (RobotAIListener)hurtRobotAI;
+          fromRobotAIListener.tell(new NotificationMessage(fromRobot, "beenHit"));
+        }
+
         RobotArenaSettings.log(fromRobot.getName() +" shot "+ hurtRobot.getName() +" for 35 damage");
 
         if(isDead) {

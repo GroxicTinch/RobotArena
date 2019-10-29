@@ -88,7 +88,14 @@ public class RobotAISeeker implements RobotAI {
         }
       }
 
-      Thread.sleep(1000);
+      sleepRand(1000);
     }
+  }
+
+  public void sleepRand(long time) throws InterruptedException {
+    if(!RobotAI.AIEXACTTIMEBETWEENMOVES) {
+      time += Math.random() * 400;
+    }
+    Thread.sleep(time);
   }
 }

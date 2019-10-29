@@ -1,7 +1,7 @@
 package robotarena;
 
 public class RobotAIRandomMove implements RobotAI {
-  static {//[FIXME] Need to make project auto build native code
+  static {
     try {
       // If the current computer is a 64bit then load the 64bit .dll else load the 32bit
       String nativeLibPath;
@@ -33,4 +33,8 @@ public class RobotAIRandomMove implements RobotAI {
   }
 
   public native void runAI(RobotControl robotControl) throws InterruptedException;
+
+  public void sleepRand(long time) {
+    //We cant use this from inside the native code anyway so do nothing
+  }
 }

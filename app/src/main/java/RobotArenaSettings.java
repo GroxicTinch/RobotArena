@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-
 public class RobotArenaSettings {
   private static boolean arenaSaved;
 
@@ -16,7 +15,7 @@ public class RobotArenaSettings {
     new RobotAIDefault(),
     new RobotAIRandomMove(),
     new RobotAISeeker(),
-    new RobotAIRunner()
+    new RobotAIHitAndRunner()
   };
 
   // Limits
@@ -26,7 +25,7 @@ public class RobotArenaSettings {
   private final static int MINHEIGHT = 8;
   private final static int MAXHEIGHT = 15;
 
-  private final static int MAXROBOTS = 4; // [TODO] find a better number
+  private final static int MAXROBOTS = 6; // [TODO] find a better number
 
   private final static int ROBOTIMAGESIZE = 100;
 
@@ -68,6 +67,7 @@ public class RobotArenaSettings {
   public static JTextArea logger;
   public static JButton btnStart;
   public static JButton btnStop;
+  public static JButton btnRestart;
 
   public static void init() {
     arenaSaved = false;

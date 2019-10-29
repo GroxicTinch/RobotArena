@@ -55,16 +55,19 @@ public class RobotArenaApp {
         JToolBar toolbar = new JToolBar();
         RobotArenaSettings.btnStart = new JButton("Start");
         RobotArenaSettings.btnStop = new JButton("Stop");
+        RobotArenaSettings.btnRestart = new JButton("Restart");
 
         JButton btnClearLog = new JButton("Clear Log");
 
         toolbar.add(RobotArenaSettings.btnStart);
         toolbar.add(RobotArenaSettings.btnStop);
+        toolbar.add(RobotArenaSettings.btnRestart);
         toolbar.add(Box.createHorizontalGlue());
         toolbar.add(btnClearLog);
 
         RobotArenaSettings.btnStart.setEnabled(true);
         RobotArenaSettings.btnStop.setEnabled(false);
+        RobotArenaSettings.btnRestart.setEnabled(false);
         
         RobotArenaSettings.logger = new JTextArea();
         JScrollPane loggerArea = new JScrollPane(RobotArenaSettings.logger);
@@ -95,6 +98,10 @@ public class RobotArenaApp {
 
         RobotArenaSettings.btnStop.addActionListener((event) -> {
           arena.stop();
+        });
+
+        RobotArenaSettings.btnRestart.addActionListener((event) -> {
+          arena.restart();
         });
 
         btnClearLog.addActionListener((event) -> {

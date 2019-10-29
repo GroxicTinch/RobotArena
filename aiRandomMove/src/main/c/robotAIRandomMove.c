@@ -88,7 +88,7 @@ JNIEXPORT void JNICALL Java_robotarena_RobotAIRandomMove_runAI(JNIEnv *env, jobj
 
             // robotControl.fire(myX, myY)
             (*env)->CallVoidMethod(env, robotControl, robotControl_fire,
-                                   myX, myY);
+                                   robotX, robotY);
             // The fire function is what usually does the delay but native code doesn't care about
             // Thread.sleep() so we must do it ourself.
             sleep(500);

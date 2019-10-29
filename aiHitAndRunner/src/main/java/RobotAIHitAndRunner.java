@@ -1,19 +1,25 @@
 package robotarena;
 
-public class RobotAIRunner implements RobotAI {
+import java.lang.*;
 
-  public RobotAIRunner() {}
+public class RobotAIHitAndRunner extends RobotAIListener {
+  private final static long RUNTIMEINSECONDS = 5;
+
+  Direction dir = Direction.NORTH;
+  long runTimeout;
+
+  public RobotAIHitAndRunner() {}
 
   @Override
   public String toString() {
-    return "Runner";
+    return "Hit and Runner";
   }
 
   /* Based on psudocode from David Cooper, SEC_2019s2_Assignment.pdf */
   public void runAI(RobotControl robotControl) throws InterruptedException {
     RobotInfo myRobot = robotControl.getRobot();
-    Direction dir = Direction.NORTH;
-
+    runTimeout = 0;
+    
     while(true) {
       int closestRobotDistance = -1;
 
@@ -24,21 +30,33 @@ public class RobotAIRunner implements RobotAI {
 
           int robotDistance = robotDistanceX + robotDistanceY;
 
+          // NOTIFICATION READING
+          synchronized(mutex) {
+            NotificationMessage notification = notificationQueue.poll();
+
+            if(notification != null) {
+              if(notification.getMessage() == "hit") {
+                runTimeout = System.currentTimeMillis() + (RUNTIMEINSECONDS * 1000);
+              } else if(notification.getMessage() == "beenHit") {
+                //[FIXME] Implement Something!!
+              }
+            }
+          }
+
           if(closestRobotDistance == -1 || robotDistance < closestRobotDistance) {
             closestRobotDistance = robotDistance;
 
-            // If the robot in columns than in rows then move vertically
             if(robotDistanceX < robotDistanceY) {
               if(robot.getY() > myRobot.getY()) {
-                dir = Direction.NORTH;
+                setDir(Direction.SOUTH);
               } else {
-                dir = Direction.SOUTH;
+                setDir(Direction.NORTH);
               }
             } else {
               if(robot.getX() > myRobot.getX()) {
-                dir = Direction.WEST;
+                setDir(Direction.EAST);
               } else {
-                dir = Direction.EAST;
+                setDir(Direction.WEST);
               }
             }
           }
@@ -88,7 +106,35 @@ public class RobotAIRunner implements RobotAI {
         }
       }
 
-      Thread.sleep(1000);
+      sleepRand(1000);
+    }
+  }
+
+  public void sleepRand(long time) throws InterruptedException {
+    if(!RobotAI.AIEXACTTIMEBETWEENMOVES) {
+      time += Math.random() * 400;
+    }
+    Thread.sleep(time);
+  }
+
+  public void setDir(Direction dirIn) {
+    if(runTimeout <= System.currentTimeMillis()) {
+      dir = dirIn;
+    } else {
+      switch(dirIn) {
+        case NORTH:
+          dir = Direction.SOUTH;
+          break;
+        case SOUTH:
+          dir = Direction.SOUTH;
+          break;
+        case WEST:
+          dir = Direction.EAST;
+          break;
+        case EAST:
+          dir = Direction.WEST;
+          break;
+      }
     }
   }
 }
