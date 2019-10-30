@@ -35,6 +35,9 @@ jar {
   manifest {
     attributes 'Main-Class': 'robotarena.RobotArenaApp'
   }
+  into 'resources', {
+    from 'resources'
+  }
 }
 
 application {

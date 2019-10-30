@@ -26,7 +26,7 @@ public class RobotArenaSettings {
   private final static int MINHEIGHT = 2;
   private final static int MAXHEIGHT = 15;
 
-  private final static int MAXROBOTS = 10; // [TODO] find a better number
+  private final static int MAXROBOTS = 10;
 
   private final static int ROBOTIMAGESIZE = 100;
 
