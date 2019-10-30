@@ -27,7 +27,8 @@ public class RobotAIDefault implements RobotAI {
 
       boolean moved = false;
 
-      while(!moved) {
+      int i = 0;
+      while(!moved && i < 4) {
         switch(dir) {
           case NORTH:
             if(robotControl.moveNorth()) {
@@ -60,6 +61,7 @@ public class RobotAIDefault implements RobotAI {
           default:
             break;
         }
+        i++;
       }
 
       sleepRand(1000);

@@ -10,10 +10,34 @@ import javax.swing.border.*;
 public class RobotArenaApp {
   public static void main(String[] args) {
     boolean userCanceled = false;
+    boolean arenaNotValid = true;
+
+    // Using this to allow the JOptionPane to show on the taskbar
+    JFrame setupWindow = new JFrame("RobotArena Setup");
+    setupWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    setupWindow.setUndecorated(true);
+    setupWindow.setLocationRelativeTo(null);
+    setupWindow.setVisible(true);
+
+    RobotArenaSettings.init();
+
+    while(arenaNotValid && !userCanceled) {
+      if(!askSettings()) {
+        userCanceled = true;
+      } else {
+        int width = (Integer)RobotArenaSettings.widthSpinner.getValue();
+        int height = (Integer)RobotArenaSettings.heightSpinner.getValue();
+        int maxCanFit = width * height;
+        if((Integer)RobotArenaSettings.robotAmountSpinner.getValue() > maxCanFit) {
+          JOptionPane.showMessageDialog(null, "Too many robots for this arena size,\nthe max you can fit in is "+ maxCanFit);
+        } else {
+          arenaNotValid = false;
+        }
+      }
+    }
+
     // We want to ask the user before anything is initialized so do it before invoke.
-    if(!askSettings()) {
-      userCanceled = true;
-    } else {
+    if(!userCanceled) {
       RobotInfo robot;
 
       // Settings need to be initialized before askRobotSettings is called
@@ -48,6 +72,7 @@ public class RobotArenaApp {
 
     // If user finished the settings then create the arena, else if canceled then print a message and exit
     if(!userCanceled) {
+      setupWindow.dispose();
       SwingUtilities.invokeLater(() -> {
         JFrame window = new JFrame("RobotArena");
         SwingArena arena = new SwingArena();
@@ -77,7 +102,7 @@ public class RobotArenaApp {
         RobotArenaSettings.log("Grid initialized:\nwidth:"+ RobotArenaSettings.getArenaWidth() +"  height:"+ RobotArenaSettings.getArenaHeight());
         
         JSplitPane splitPane = new JSplitPane(
-        JSplitPane.HORIZONTAL_SPLIT, arena, RobotArenaSettings.logger);
+        JSplitPane.HORIZONTAL_SPLIT, arena, loggerArea);
 
         Container contentPane = window.getContentPane();
         contentPane.setLayout(new BorderLayout());
@@ -110,12 +135,11 @@ public class RobotArenaApp {
       });
     } else {
       System.out.println("User Canceled");
+      setupWindow.dispose();
     }
   }
 
   private static boolean askSettings() {
-    RobotArenaSettings.init();
-
     int selection = JOptionPane.showConfirmDialog(null, arenaSettingsPanel(), "Robot Arena Settings"
                             , JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 

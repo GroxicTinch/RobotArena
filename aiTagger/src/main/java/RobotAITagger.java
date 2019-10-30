@@ -1,56 +1,61 @@
 package robotarena;
 
-public class RobotAISeeker  extends RobotAIDefault {
+import java.lang.*;
 
-  public RobotAISeeker() {}
+public class RobotAITagger extends RobotAIDefault {
+  private static boolean doOnce = true;
+  
+  public RobotAITagger() {}
 
   @Override
   public String toString() {
-    return "Seeker";
+    return "Tagger";
   }
 
   /* Based on psudocode from David Cooper, SEC_2019s2_Assignment.pdf */
   public void runAI(RobotControl robotControl) throws InterruptedException {
     RobotInfo myRobot = robotControl.getRobot();
-    Direction dir = Direction.NORTH;
+
+    boolean imIt;
+
+    if(doOnce) {
+      imIt = true;
+      doOnce = false;
+    } else {
+      imIt = false;
+    }
 
     while(true) {
-      int closestRobotDistance = -1;
+      // NOTIFICATION READING, does thread safety in RobotControl
+      NotificationMessage notification = robotControl.getMsg();
 
-      for(RobotInfo robot : robotControl.getAllRobots()) {
-        if(robot.getName() != myRobot.getName() && robot.isAlive()) {
-          int robotDistanceX = Math.abs(myRobot.getX() - robot.getX());
-          int robotDistanceY = Math.abs(myRobot.getY() - robot.getY());
-
-          int robotDistance = robotDistanceX + robotDistanceY;
-
-          if(closestRobotDistance == -1 || robotDistance < closestRobotDistance) {
-            closestRobotDistance = robotDistance;
-
-            // If the robot in columns than in rows then move vertically
-            if(robotDistanceX < robotDistanceY) {
-              if(robot.getY() < myRobot.getY()) {
-                dir = Direction.NORTH;
-              } else {
-                dir = Direction.SOUTH;
-              }
-            } else {
-              if(robot.getX() < myRobot.getX()) {
-                dir = Direction.WEST;
-              } else {
-                dir = Direction.EAST;
-              }
-            }
+      if(notification != null) {
+        if(notification.getRobot().getAI() instanceof RobotAITagger){
+          // We dont care about kills because that would mean the only person that is "it" is dead
+          // (still can happen if theres a different AI out there)
+          String msg = notification.getMessage();
+          if(msg == "hit") {
+            imIt = false;
+          } else if(msg == "beenHit") {
+            imIt = true;
           }
+        }
+      }
 
-          if(robotDistanceX <= 2 && robotDistanceY <= 2) {
+      if(imIt) {
+        for(RobotInfo robot : robotControl.getAllRobots()) {
+          if(robot.getName() != myRobot.getName() &&
+             robot.isAlive() &&
+             Math.abs(myRobot.getX() - robot.getX()) <= 2 &&
+             Math.abs(myRobot.getY() - robot.getY()) <= 2) {
             robotControl.fire(robot.getX(), robot.getY());
             break;
           }
         }
       }
 
-      // Move towards the closest robot, if it cannot move that direction then choose the next direction.
+      // Choose a random direction, if that fails then go in the next direction, clockwise
+      Direction dir = Direction.values()[(int)(Math.random() * 4)];
       boolean moved = false;
 
       int i = 0;

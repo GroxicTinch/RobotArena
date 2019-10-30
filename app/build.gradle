@@ -28,7 +28,7 @@ distributions {
 }
 
 dependencies{
-  implementation project(':aiDependencies'), project(':aiDefault'), project(':aiRandomMove'), project(':aiSeeker'), project(':aiHitAndRunner')
+  implementation project(':aiDependencies'), project(':aiDefault'), project(':aiRandomMove'), project(':aiSeeker'), project(':aiHitAndRunner'), project(':aiTagger')
 }
 
 jar {

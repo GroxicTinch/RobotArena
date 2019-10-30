@@ -1,6 +1,6 @@
 package robotarena;
 
-public class RobotAIRandomMove implements RobotAI {
+public class RobotAIRandomMove extends RobotAIDefault {
   static {
     try {
       // If the current computer is a 64bit then load the 64bit .dll else load the 32bit
@@ -33,8 +33,4 @@ public class RobotAIRandomMove implements RobotAI {
   }
 
   public native void runAI(RobotControl robotControl) throws InterruptedException;
-
-  public void sleepRand(long time) {
-    //We cant use this from inside the native code anyway so do nothing
-  }
 }

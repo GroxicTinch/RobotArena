@@ -1,3 +1,3 @@
-include 'aiDependencies', 'aiDefault', 'aiRandomMove', 'aiSeeker', 'aiHitAndRunner', 'app'
+include 'aiDependencies', 'aiDefault', 'aiRandomMove', 'aiSeeker', 'aiHitAndRunner', 'aiTagger', 'app'
 
 rootProject.name = 'RobotArena'

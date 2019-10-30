@@ -113,9 +113,10 @@ JNIEXPORT void JNICALL Java_robotarena_RobotAIRandomMove_runAI(JNIEnv *env, jobj
     }
     int dir = rand() % 4;
 
+    int ii = 0;
     int moved = 0;
 
-    while(moved == 0) {
+    while(moved == 0 && ii < 4) {
       switch(dir) {
         case 0:
           if((*env)->CallObjectMethod(env, robotControl, robotControl_moveNorth)) {
@@ -145,6 +146,7 @@ JNIEXPORT void JNICALL Java_robotarena_RobotAIRandomMove_runAI(JNIEnv *env, jobj
             dir = 0;
           }
           break;
+        ii++;
       }
 
       if((*env)->ExceptionCheck(env)){

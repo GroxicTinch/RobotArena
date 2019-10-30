@@ -2,9 +2,13 @@ package robotarena;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ArrayBlockingQueue;
 
 public class RobotControlImpl implements RobotControl {
   private static HashMap<String, RobotInfo> robots = new HashMap<String, RobotInfo>();
+  private Object mutex = new Object();
+  private BlockingQueue<NotificationMessage> notificationQueue;
 
   public RobotInfo robotInfo;
 
@@ -12,6 +16,7 @@ public class RobotControlImpl implements RobotControl {
 
   public RobotControlImpl(RobotInfo robotInfoIn) {
     robotInfo = robotInfoIn;
+    notificationQueue = new ArrayBlockingQueue<NotificationMessage>(10);
   }
 
   public RobotInfo getRobot() {
@@ -49,6 +54,24 @@ public class RobotControlImpl implements RobotControl {
       SwingArena.getInstance().shoot(robotInfo, x, y);
     }
     return true;
+  }
+
+  public void tell(NotificationMessage notificationMessage) {
+    synchronized(mutex) {
+      if(notificationQueue.size() == 10) {
+        /* Make sure that if its running slow it doesnt just ignore new messages
+          itll instead drop its oldest one before adding a new one.
+        */
+        notificationQueue.poll(); 
+      }
+      notificationQueue.offer(notificationMessage);
+    }
+  }
+
+  public NotificationMessage getMsg() {
+    synchronized(mutex) {
+      return notificationQueue.poll();
+    }
   }
 
   public boolean isMovePosLegal(int x, int y) {

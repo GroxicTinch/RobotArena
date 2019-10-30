@@ -33,20 +33,6 @@ public class SwingArena extends JPanel {
     instance = this;
     robotShots = new ArrayList<Shot>();
     livingRobots = 0;
-
-    Runnable task = () -> {
-      try {
-        while(true) {
-          repaint();
-          Thread.sleep(50);
-        }
-      } catch (InterruptedException e) {
-
-      }
-    };
-
-    Thread t = new Thread(task, "repaint");
-    t.start();
   }
 
   public static SwingArena getInstance() { return instance; }
@@ -74,10 +60,8 @@ public class SwingArena extends JPanel {
         robot.reset();
       }
 
-      RobotArenaSettings.log(robot.getName() +" has been added to the arena!" +
-                           "\nWeighing in at "+ robot.getHealth() +" stamina" +
-                           "\nStarting at X:"+ (robot.getX()+1) +" Y:"+ (robot.getY()+1) +
-                           "\nWith the "+ robot.getAI().toString() +" brain\n");
+      RobotArenaSettings.log(robot.getName() +" has been added" +
+                           "\n    AI: "+ robot.getAI().toString());
 
       Runnable robotTask = () -> {
         try {
@@ -142,36 +126,45 @@ public class SwingArena extends JPanel {
       robotShots.add(new Shot(fromRobot.getX(), fromRobot.getY(), x, y));
       
       RobotInfo hurtRobot = (new RobotControlImpl()).isGridCellOccupied(x, y);
-      if(hurtRobot != null) {
+      
+      // If two robots shoot the same one and it dies we dont want the second shot counting as a hit so check if its alive
+      if(hurtRobot != null && hurtRobot.isAlive()) {
         boolean isDead = hurtRobot.damage(35);
 
-        // If a robot has been shot, and the shooter is an AIListener then tell him they hit
-        RobotAI fromRobotAI = fromRobot.getAI();
-        if(fromRobotAI instanceof RobotAIListener) {
-          RobotAIListener fromRobotAIListener = (RobotAIListener)fromRobotAI;
-          fromRobotAIListener.tell(new NotificationMessage(hurtRobot, "hit"));
+        // If a robot has been shot then tell him they hit
+        if(isDead) {
+          fromRobot.getControl().tell(new NotificationMessage(hurtRobot, "kill"));
+        } else {
+          fromRobot.getControl().tell(new NotificationMessage(hurtRobot, "hit"));
         }
 
         // Likewise, if a robot has been shot tell the victum they have been hurt
-        RobotAI hurtRobotAI = hurtRobot.getAI();
-        if(hurtRobotAI instanceof RobotAIListener) {
-          RobotAIListener hurtRobotAIListener = (RobotAIListener)hurtRobotAI;
-          fromRobotAIListener.tell(new NotificationMessage(fromRobot, "beenHit"));
-        }
+        hurtRobot.getControl().tell(new NotificationMessage(fromRobot, "beenHit"));
 
-        RobotArenaSettings.log(fromRobot.getName() +" shot "+ hurtRobot.getName() +" for 35 damage");
+        RobotArenaSettings.log(fromRobot.getName() +" shot "+ hurtRobot.getName() +" for 35");
 
         if(isDead) {
           livingRobots--;
           hurtRobot.stopThread();
-          RobotArenaSettings.log("The damage was fatal, killing "+ hurtRobot.getName());
+          RobotArenaSettings.log("/R.I.P\\ "+ hurtRobot.getName() +" has died");
 
           if(livingRobots <= 1) {
-            RobotArenaSettings.log("All Other Robots are Dead, Game Over");
+            RobotArenaSettings.log("One remains, Game Over!");
             stop();
           }
         }
       }
+      Runnable task = () -> {
+        try {
+          Thread.sleep(250);
+          repaint();
+        } catch (InterruptedException e) {
+
+        }
+      };
+
+      Thread t = new Thread(task, "removeShot");
+      t.start();
       repaint();
     }
   }

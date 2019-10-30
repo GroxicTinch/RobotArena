@@ -15,6 +15,9 @@ interface RobotControl {
 
   public boolean fire(int x, int y) throws InterruptedException;
 
+  public void tell(NotificationMessage notificationMessage);
+  public NotificationMessage getMsg();
+
   public boolean isMovePosLegal(int x, int y);
   public boolean isShotPosLegal(int x, int y);
 

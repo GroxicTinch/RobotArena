@@ -8,24 +8,25 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RobotArenaSettings {
-  private static boolean arenaSaved;
+  private final static boolean RANDOMROBOTSTARTPOS = false;
 
   // Available AI Implementations
   private final static RobotAI[] robotAIs = {
     new RobotAIDefault(),
     new RobotAIRandomMove(),
     new RobotAISeeker(),
-    new RobotAIHitAndRunner()
+    new RobotAIHitAndRunner(),
+    new RobotAITagger()
   };
 
   // Limits
-  private final static int MINWIDTH = 8;
+  private final static int MINWIDTH = 2;
   private final static int MAXWIDTH = 15;
 
-  private final static int MINHEIGHT = 8;
+  private final static int MINHEIGHT = 2;
   private final static int MAXHEIGHT = 15;
 
-  private final static int MAXROBOTS = 6; // [TODO] find a better number
+  private final static int MAXROBOTS = 10; // [TODO] find a better number
 
   private final static int ROBOTIMAGESIZE = 100;
 
@@ -40,6 +41,8 @@ public class RobotArenaSettings {
   private static int robotCount;
 
   private static String failReason;
+
+  private static boolean arenaSaved;
 
   // Public Variables
   // JPanel Controls
@@ -93,11 +96,15 @@ public class RobotArenaSettings {
     robotNames.add("Tyler");
     robotNames.add("Beth");
     robotNames.add("Ray");
+    robotNames.add("Pembleton");
+    robotNames.add("Robert");
+    robotNames.add("Zach");
   }
 
   static void generateRobotImages() {
     robotImages.add("1554047213");
     robotImages.add("droid2");
+    robotImages.add("bandit");
   }
 
   public static boolean addRobot(RobotInfo robot) {
@@ -113,7 +120,7 @@ public class RobotArenaSettings {
       failReason += "Starting Y was "+ robot.getDefX() +" but should be between 0 and "+ (getArenaHeight()-1) +".\n";
     }
     if(robot.getControl().isGridCellOccupied(robot.getDefX(), robot.getDefY()) != null) { 
-      failReason += "A Robot is already at X:"+ robot.getDefX() +" Y:"+ robot.getDefX() +".\n";
+      failReason += "A Robot is already at X:"+ robot.getDefX() +" Y:"+ robot.getDefY() +".\n";
     }
 
     if(failReason.length() > 0) {
@@ -132,7 +139,14 @@ public class RobotArenaSettings {
   }
 
   public static void initRobotControls() {
-    initRobotControls(getRandomRobotName(), 0, 0, 0, getRandomRobotImageIndex());
+    int startX = 0;
+    int startY = 0;
+
+    if(RANDOMROBOTSTARTPOS) {
+      startX = (int)(Math.random() * arenaWidth);
+      startY = (int)(Math.random() * arenaHeight);
+    }
+    initRobotControls(getRandomRobotName(), startX, startY, 0, getRandomRobotImageIndex());
   }
 
   public static void initRobotControls(String name, int x, int y, int robotAIIndex, int robotImageIndex) {
